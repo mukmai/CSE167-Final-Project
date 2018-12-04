@@ -49,12 +49,12 @@ void Window::initialize_objects()
 	textureFiles.push_back("Skybox_Water222_back.ppm"); // back
 
 	sphere = new OBJObject("sphere.obj");
-	ball = new Geometry(sphere, glm::vec3(0.5, 0.5, 0));
+	ball = new Geometry(sphere, glm::vec3(0.5, 0.5, 0.9));
 
 	world = new Transform(glm::mat4(1.0f));
 	cubemapS = new Transform(glm::scale(glm::mat4(1.0f), glm::vec3(500.0f)));
 	cubemap = new CubeMap(textureFiles);
-	sunLight = new LightSource(glm::vec3(0.2, 0.8, 0.8), glm::vec3(0, -1, -1));
+	sunLight = new LightSource(glm::vec3(1, 1, 1), glm::vec3(0, -1, -1));
 
 	world->addChild(cubemapS);
 	//world->addChild(sunLight);
