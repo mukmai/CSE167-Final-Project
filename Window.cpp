@@ -266,6 +266,9 @@ void Window::key_callback(GLFWwindow* window, int key, int scancode, int action,
 		}
 		regularV = VM * VOrig;
 	}
+	else if (key == GLFW_KEY_2) {
+		terrain->switchSpreading();
+	}
 }
 
 void Window::mouse_callback(GLFWwindow* window, int button, int action, int mods)

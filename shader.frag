@@ -26,7 +26,14 @@ struct PointLight {
 	float cons_att; // k
 };
 
-uniform int drawType; // 0: color; 1: texture; 2: skybox; 
+uniform struct Terrain {
+	vec3 desert;
+	vec3 grass;
+	vec3 center;
+	int radius;
+} terrain;
+
+uniform int drawType; // 0: color; 1: texture; 2: skybox; 3: terrain;
 uniform vec3 cameraPos;
 uniform DirLight dirLight;
 uniform PointLight pointLight;
@@ -73,9 +80,20 @@ vec3 CalcPointLight(PointLight light, vec3 normal, vec3 fragPos) {
 		diffuse *= material.diffuse;
 	}
 	// render with texture
-	if (drawType == 1) {
+	else if (drawType == 1) {
 		ambient *= vec3(texture(material.diffuseTex, TexCoords));
 		diffuse *= vec3(texture(material.diffuseTex, TexCoords));
+	}
+	// render for terrain
+	else if (drawType == 3) {
+		float dist = sqrt(pow(Position.x - terrain.center.x, 2) + pow(Position.z - terrain.center.z, 2));
+		if (dist >= terrain.radius) {
+			ambient *= terrain.desert;
+			diffuse *= terrain.desert;
+		} else {
+			ambient *= terrain.grass;
+			diffuse *= terrain.grass;
+		}
 	}
 	
 	return (ambient + diffuse);
@@ -96,6 +114,17 @@ vec3 CalcDirLight(DirLight light, vec3 normal) {
 	if (drawType == 1) {
 		ambient *= vec3(texture(material.diffuseTex, TexCoords));
 		diffuse *= vec3(texture(material.diffuseTex, TexCoords));
+	}
+	// render for terrain
+	else if (drawType == 3) {
+		float dist = sqrt(pow(Position.x - terrain.center.x, 2) + pow(Position.z - terrain.center.z, 2));
+		if (dist >= terrain.radius) {
+			ambient *= terrain.desert;
+			diffuse *= terrain.desert;
+		} else {
+			ambient *= terrain.grass;
+			diffuse *= terrain.grass;
+		}
 	}
 	
 	return (ambient + diffuse);

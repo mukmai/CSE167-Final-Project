@@ -13,6 +13,10 @@ Terrain::Terrain(int row, int col, float distance, std::vector<std::pair<Node*,i
 	heightScale = 90;
 	stageR = 5;
 	smoothR = 50;
+	desertColor = glm::vec3(0.96, 0.64, 0.38);
+	grassColor = glm::vec3(0.53, 0.78, 0.38);
+	grassRadius = -1;
+	spread = false;
 	
 	initializeTerrain();
 
@@ -43,14 +47,25 @@ Terrain::~Terrain()
 }
 
 void Terrain::draw(GLuint shaderProgram, glm::mat4 C) {
+	if (spread && grassRadius < row) {
+		grassRadius++;
+	}
+	else if (!spread && grassRadius > -1) {
+		grassRadius--;
+	}
 	glUniformMatrix4fv(glGetUniformLocation(shaderProgram, "projection"), 1, GL_FALSE, &Window::P[0][0]);
 	glUniformMatrix4fv(glGetUniformLocation(shaderProgram, "view"), 1, GL_FALSE, &Window::V[0][0]);
 	glUniformMatrix4fv(glGetUniformLocation(shaderProgram, "model"), 1, GL_FALSE, &C[0][0]);
-	glUniform1i(glGetUniformLocation(shaderProgram, "drawType"), 0);
+	glUniform1i(glGetUniformLocation(shaderProgram, "drawType"), 3);
 	glm::vec3 cameraPos = glm::vec3(Window::V[3]);
 	glm::vec3 diffuse = glm::vec3(0.96,0.64,0.38);
 	glUniform3fv(glGetUniformLocation(shaderProgram, "cameraPos"), 1, &cameraPos[0]);
-	glUniform3fv(glGetUniformLocation(shaderProgram, "material.diffuse"), 1, &diffuse[0]);
+	glUniform3fv(glGetUniformLocation(shaderProgram, "terrain.desert"), 1, &desertColor[0]);
+	glUniform3fv(glGetUniformLocation(shaderProgram, "terrain.grass"), 1, &grassColor[0]);
+	glm::vec3 center = glm::vec4(terrainVertices[row / 2][col / 2], 1);
+	glUniform3fv(glGetUniformLocation(shaderProgram, "terrain.center"), 1, &center[0]);
+	glUniform1i(glGetUniformLocation(shaderProgram, "terrain.radius"), grassRadius);
+
 	glBindVertexArray(VAO);
 	glDrawArrays(GL_TRIANGLE_STRIP, 0, (int)vertices_.size());
 	// Unbind the VAO when we're done so we don't accidentally draw extra stuff or tamper with its bound buffers
@@ -228,4 +243,8 @@ void Terrain::generateObjectPosition(Node* object, int amount) {
 			count++;
 		}
 	}
+}
+
+void Terrain::switchSpreading() {
+	spread = !spread;
 }

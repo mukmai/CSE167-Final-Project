@@ -13,7 +13,7 @@ private:
 	std::vector<std::vector<glm::vec3>> terrainVertices;
 	std::vector<std::vector<glm::vec3>> terrainNormals;
 	float distance;
-	int row, col;
+	int row, col, grassRadius;
 	std::vector<glm::vec3> vertices_;
 	std::vector<glm::vec3> normals_;
 	std::vector<std::vector<float>> perlinNoiseSeed;
@@ -22,6 +22,8 @@ private:
 	std::list<Node*> childrenList;
 	std::set<std::pair<int, int>> usedPositions;
 	std::vector<std::pair<Node*, int>> objects;
+	glm::vec3 desertColor, grassColor;
+	bool spread;
 
 public:
 	Terrain(int row, int col, float distance, std::vector<std::pair<Node*, int>> objects);
@@ -35,8 +37,10 @@ public:
 	float lerp(float t, float a, float b);
 	void setStagePlane();
 	void generateObjectPosition(Node* object, int amount);
+	void switchSpreading();
 
 	GLuint VBO, VBO2, VAO;
+
 };
 
 #endif
