@@ -19,6 +19,8 @@ Terrain* terrain;
 int terrainSize = 256;
 unsigned int Window::seed = 4;
 
+std::vector<std::pair<Node*, int>> objects;
+
 GLint shaderProgram;
 
 // On some systems you need to change this to the absolute path
@@ -56,7 +58,6 @@ void Window::initialize_objects()
 	textureFiles.push_back("Skybox_Water222_base.ppm"); // bottom
 	textureFiles.push_back("Skybox_Water222_front.ppm"); // front
 	textureFiles.push_back("Skybox_Water222_back.ppm"); // back
-	terrain = new Terrain(terrainSize, terrainSize, 1);
 
 	sphere = new OBJObject("sphere.obj", true);
 	cylinder = new OBJObject("body_s.obj", false);
@@ -72,6 +73,16 @@ void Window::initialize_objects()
 	cubemap = new CubeMap(textureFiles);
 
 	sunLight = new LightSource(glm::vec3(0.5, 0.47, 0.35), glm::vec3(0, -1, -1));
+
+
+	Geometry* object1 = new Geometry(cylinder, glm::vec3(0.7, 0, 0));
+	Geometry* object2 = new Geometry(cylinder, glm::vec3(0, 0.7, 0));
+	Geometry* object3 = new Geometry(cylinder, glm::vec3(0, 0, 0.7));
+	objects.push_back(std::make_pair(object1, 20));
+	objects.push_back(std::make_pair(object2, 20));
+	objects.push_back(std::make_pair(object3, 10));
+
+	terrain = new Terrain(terrainSize, terrainSize, 1, objects);
 
 	world->addChild(cubemapS);
 	cubemapS->addChild(cubemap);
@@ -246,12 +257,12 @@ void Window::key_callback(GLFWwindow* window, int key, int scancode, int action,
 		if (mods == GLFW_MOD_SHIFT) {
 			seed--;
 			delete(terrain);
-			terrain = new Terrain(terrainSize, terrainSize, 1);
+			terrain = new Terrain(terrainSize, terrainSize, 1, objects);
 		}
 		else {
 			seed++;
 			delete(terrain);
-			terrain = new Terrain(terrainSize, terrainSize, 1);
+			terrain = new Terrain(terrainSize, terrainSize, 1, objects);
 		}
 		regularV = VM * VOrig;
 	}

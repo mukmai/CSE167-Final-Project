@@ -4,6 +4,8 @@
 #include "Window.h"
 #include <stdlib.h>
 #include <vector>
+#include <list>
+#include <set>
 class Terrain :
 	public Node
 {
@@ -17,10 +19,12 @@ private:
 	std::vector<std::vector<float>> perlinNoiseSeed;
 	int nOctaves, stageR, smoothR;
 	float scaleBias, heightScale;
-
+	std::list<Node*> childrenList;
+	std::set<std::pair<int, int>> usedPositions;
+	std::vector<std::pair<Node*, int>> objects;
 
 public:
-	Terrain(int row, int col, float distance);
+	Terrain(int row, int col, float distance, std::vector<std::pair<Node*, int>> objects);
 	~Terrain();
 	void draw(GLuint shaderProgram, glm::mat4 C);
 	void update();
@@ -30,6 +34,7 @@ public:
 	void perlinNoise();
 	float lerp(float t, float a, float b);
 	void setStagePlane();
+	void generateObjectPosition(Node* object, int amount);
 
 	GLuint VBO, VBO2, VAO;
 };

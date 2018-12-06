@@ -2,16 +2,18 @@
 
 
 
-Terrain::Terrain(int row, int col, float distance)
+Terrain::Terrain(int row, int col, float distance, std::vector<std::pair<Node*,int>> objects)
 {
 	this->distance = distance;
 	this->row = row;
 	this->col = col;
+	this->objects = objects;
 	nOctaves = 5;
 	scaleBias = 1.5;
 	heightScale = 90;
 	stageR = 5;
 	smoothR = 50;
+	
 	initializeTerrain();
 
 	glGenVertexArrays(1, &VAO);
@@ -53,6 +55,9 @@ void Terrain::draw(GLuint shaderProgram, glm::mat4 C) {
 	glDrawArrays(GL_TRIANGLE_STRIP, 0, (int)vertices_.size());
 	// Unbind the VAO when we're done so we don't accidentally draw extra stuff or tamper with its bound buffers
 	glBindVertexArray(0);
+	for (auto it = childrenList.begin(); it != childrenList.end(); ++it) {
+		(*it)->draw(shaderProgram, C);
+	}
 }
 
 void Terrain::update() {
@@ -77,7 +82,9 @@ void Terrain::initializeTerrain() {
 	setStagePlane();
 	generateVertices();
 	generateNormals();
-
+	for (auto& object : objects) {
+		generateObjectPosition(object.first, object.second);
+	}
 	update();
 }
 
@@ -194,14 +201,31 @@ void Terrain::setStagePlane() {
 	int centerC = col / 2;
 	for (int i = 0; i < row; i++) {
 		for (int j = 0; j < col; j++) {
-			float sqrdist = sqrt(pow(i - centerR, 2) + pow(j - centerC, 2));
-			if (sqrdist <= stageR) {
+			float dist = sqrt(pow(i - centerR, 2) + pow(j - centerC, 2));
+			if (dist <= stageR) {
 				perlinNoiseSeed[i][j] = 0;
 			}
-			else if (sqrdist <= smoothR + stageR) {
-				float t = (float)(sqrdist - stageR) / (float)smoothR;
+			else if (dist <= smoothR + stageR) {
+				float t = (float)(dist - stageR) / (float)smoothR;
 				perlinNoiseSeed[i][j] = lerp(t, 0, perlinNoiseSeed[i][j]);
 			}
+		}
+	}
+}
+
+void Terrain::generateObjectPosition(Node* object, int amount) {
+	int count = 0;
+	while (count < amount) {
+		int i = (float)rand() / RAND_MAX * row;
+		int j = (float)rand() / RAND_MAX * col;
+		float dist = sqrt(pow(i - row/2, 2) + pow(j - col/2, 2));
+		if (dist <= stageR + 2) continue;
+		std::pair<int, int> curPos = std::make_pair(i, j);
+		if (usedPositions.insert(curPos).second) {
+			Transform* offset = new Transform(glm::translate(glm::mat4(1.0f), terrainVertices[i][j]));
+			offset->addChild(object);
+			childrenList.push_back(offset);
+			count++;
 		}
 	}
 }
