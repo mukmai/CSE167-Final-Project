@@ -10,8 +10,9 @@ Transform* world;
 Transform* cubemapS;
 Transform* stageOffset;
 Transform* stageS;
+Transform* orbOffset;
 
-Geometry* ball;
+Geometry* orb;
 Geometry* stage;
 
 LightSource* sunLight;
@@ -62,18 +63,18 @@ void Window::initialize_objects()
 	sphere = new OBJObject("sphere.obj", true);
 	cylinder = new OBJObject("body_s.obj", false);
 
-	ball = new Geometry(sphere, glm::vec3(0.5, 0.5, 0.9));
+	orb = new Geometry(sphere, glm::vec3(0, 0.80, 0.91));
 	stage = new Geometry(cylinder, glm::vec3(0.5, 0.5, 0.5));
 
 	world = new Transform(glm::mat4(1.0f));
 	cubemapS = new Transform(glm::scale(glm::mat4(1.0f), glm::vec3(500.0f)));
 	stageOffset = new Transform(glm::translate(glm::mat4(1.0f), glm::vec3(0,-0.5,0)));
 	stageS = new Transform(glm::scale(glm::mat4(1.0f), glm::vec3(5,1,5)));
+	orbOffset = new Transform(glm::translate(glm::mat4(1.0f), glm::vec3(0, 5, 0)));
 
 	cubemap = new CubeMap(textureFiles);
 
 	sunLight = new LightSource(glm::vec3(0.5, 0.47, 0.35), glm::vec3(0, -1, -1));
-
 
 	Geometry* object1 = new Geometry(cylinder, glm::vec3(0.7, 0, 0));
 	Geometry* object2 = new Geometry(cylinder, glm::vec3(0, 0.7, 0));
@@ -86,10 +87,12 @@ void Window::initialize_objects()
 
 	world->addChild(cubemapS);
 	cubemapS->addChild(cubemap);
-	world->addChild(ball);
 	world->addChild(terrain);
 	world->addChild(stageOffset);
 	stageOffset->addChild(stageS);
+	stageOffset->addChild(orbOffset);
+	orbOffset->addChild(orb);
+
 	stageS->addChild(stage);
 
 	// Load the shader program. Make sure you have the correct filepath up top
