@@ -1,10 +1,10 @@
 #include "OBJObject.h"
 #include "Window.h"
 
-OBJObject::OBJObject(const char *filepath)
+OBJObject::OBJObject(const char *filepath, bool sorted)
 {
 	drawType = 0;
-	if (true) {
+	if (sorted) {
 		parseSorted(filepath);
 	}
 	else {

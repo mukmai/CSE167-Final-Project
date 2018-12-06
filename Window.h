@@ -18,6 +18,7 @@
 #include "Geometry.h"
 #include "OBJObject.h"
 #include "LightSource.h"
+#include "Terrain.h"
 
 class Window
 {
@@ -26,6 +27,7 @@ public:
 	static int height;
 	static glm::mat4 P; // P for projection
 	static glm::mat4 V; // V for view
+	static unsigned int seed;
 	static void initialize_objects();
 	static void clean_up();
 	static GLFWwindow* create_window(int width, int height);

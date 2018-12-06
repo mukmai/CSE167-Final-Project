@@ -30,7 +30,7 @@ private:
 	glm::vec3 diffuse;
 
 public:
-	OBJObject(const char* filepath);
+	OBJObject(const char* filepath, bool sorted);
 	~OBJObject();
 
 	void parse(const char* filepath);

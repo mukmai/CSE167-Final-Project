@@ -27,6 +27,7 @@
     <ClInclude Include="..\OBJObject.h" />
     <ClInclude Include="..\Project3-texture.h" />
     <ClInclude Include="..\shader.h" />
+    <ClInclude Include="..\Terrain.h" />
     <ClInclude Include="..\Transform.h" />
     <ClInclude Include="..\Window.h" />
   </ItemGroup>
@@ -39,6 +40,7 @@
     <ClCompile Include="..\OBJObject.cpp" />
     <ClCompile Include="..\Project3-texture.cpp" />
     <ClCompile Include="..\shader.cpp" />
+    <ClCompile Include="..\Terrain.cpp" />
     <ClCompile Include="..\Transform.cpp" />
     <ClCompile Include="..\Window.cpp" />
   </ItemGroup>

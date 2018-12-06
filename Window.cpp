@@ -3,12 +3,21 @@
 const char* window_title = "GLFW Starter Project";
 
 OBJObject* sphere;
+OBJObject* cylinder;
 
 CubeMap* cubemap;
 Transform* world;
 Transform* cubemapS;
+Transform* stageOffset;
+Transform* stageS;
+
 Geometry* ball;
+Geometry* stage;
+
 LightSource* sunLight;
+Terrain* terrain;
+int terrainSize = 256;
+unsigned int Window::seed = 4;
 
 GLint shaderProgram;
 
@@ -47,19 +56,30 @@ void Window::initialize_objects()
 	textureFiles.push_back("Skybox_Water222_base.ppm"); // bottom
 	textureFiles.push_back("Skybox_Water222_front.ppm"); // front
 	textureFiles.push_back("Skybox_Water222_back.ppm"); // back
+	terrain = new Terrain(terrainSize, terrainSize, 1);
 
-	sphere = new OBJObject("sphere.obj");
+	sphere = new OBJObject("sphere.obj", true);
+	cylinder = new OBJObject("body_s.obj", false);
+
 	ball = new Geometry(sphere, glm::vec3(0.5, 0.5, 0.9));
+	stage = new Geometry(cylinder, glm::vec3(0.5, 0.5, 0.5));
 
 	world = new Transform(glm::mat4(1.0f));
 	cubemapS = new Transform(glm::scale(glm::mat4(1.0f), glm::vec3(500.0f)));
+	stageOffset = new Transform(glm::translate(glm::mat4(1.0f), glm::vec3(0,-0.5,0)));
+	stageS = new Transform(glm::scale(glm::mat4(1.0f), glm::vec3(5,1,5)));
+
 	cubemap = new CubeMap(textureFiles);
-	sunLight = new LightSource(glm::vec3(1, 1, 1), glm::vec3(0, -1, -1));
+
+	sunLight = new LightSource(glm::vec3(0.5, 0.47, 0.35), glm::vec3(0, -1, -1));
 
 	world->addChild(cubemapS);
-	//world->addChild(sunLight);
 	cubemapS->addChild(cubemap);
 	world->addChild(ball);
+	world->addChild(terrain);
+	world->addChild(stageOffset);
+	stageOffset->addChild(stageS);
+	stageS->addChild(stage);
 
 	// Load the shader program. Make sure you have the correct filepath up top
 	shaderProgram = LoadShaders(VERTEX_SHADER_PATH, FRAGMENT_SHADER_PATH);
@@ -156,6 +176,7 @@ void Window::display_callback(GLFWwindow* window)
 	// Use the shader of programID
 	glUseProgram(shaderProgram);
 	sunLight->draw(shaderProgram, glm::mat4(1.0f));
+	//terrain->draw(shaderProgram, glm::mat4(1.0f));
 	world->draw(shaderProgram, glm::mat4(1.0f));
 
 	// Gets events, including input such as keyboard and mouse or window resizing
@@ -219,6 +240,19 @@ void Window::key_callback(GLFWwindow* window, int key, int scancode, int action,
 	}
 	else if (key == GLFW_KEY_Q) {
 		VM = glm::translate(VM, glm::vec3(0, 0.8f, 0));
+		regularV = VM * VOrig;
+	}
+	else if (key == GLFW_KEY_1) {
+		if (mods == GLFW_MOD_SHIFT) {
+			seed--;
+			delete(terrain);
+			terrain = new Terrain(terrainSize, terrainSize, 1);
+		}
+		else {
+			seed++;
+			delete(terrain);
+			terrain = new Terrain(terrainSize, terrainSize, 1);
+		}
 		regularV = VM * VOrig;
 	}
 }
