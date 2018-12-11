@@ -1,6 +1,8 @@
 #include "window.h"
 
 const char* window_title = "GLFW Starter Project";
+bool fullScreen = false;
+bool playerView = true;
 
 OBJObject* sphere;
 OBJObject* cylinder;
@@ -21,6 +23,9 @@ int terrainSize = 256;
 unsigned int Window::seed = 4;
 
 std::vector<std::pair<Node*, int>> objects;
+
+Player* player;
+PlayerBody* playerBody;
 
 GLint shaderProgram;
 
@@ -43,13 +48,14 @@ std::vector<const char*> textureFiles;
 
 // Trackball variables
 int lbutton_down = false;
-glm::vec3 lastPoint;
-glm::vec3 curPoint;
+glm::vec3 lastTrackBallPoint;
+glm::vec3 curTrackBallPoint;
 glm::mat4 VM = glm::mat4(1.0f);
 glm::mat4 VOrig = glm::mat4(1.0f);
-
 glm::mat4 regularV;
-bool playerView = false;
+
+glm::vec2 lastMousePos;
+glm::vec2 curMousePos;
 
 void Window::initialize_objects()
 {
@@ -74,20 +80,17 @@ void Window::initialize_objects()
 
 	cubemap = new CubeMap(textureFiles);
 
+	initializeTerrain();
+
 	sunLight = new LightSource(glm::vec3(0.5, 0.47, 0.35), glm::vec3(0, -1, -1));
 
-	Geometry* object1 = new Geometry(cylinder, glm::vec3(0.7, 0, 0));
-	Geometry* object2 = new Geometry(cylinder, glm::vec3(0, 0.7, 0));
-	Geometry* object3 = new Geometry(cylinder, glm::vec3(0, 0, 0.7));
-	objects.push_back(std::make_pair(object1, 20));
-	objects.push_back(std::make_pair(object2, 20));
-	objects.push_back(std::make_pair(object3, 10));
-
-	terrain = new Terrain(terrainSize, terrainSize, 1, objects);
+	Geometry* bodyPart = new Geometry(cylinder, glm::vec3(0.95, 0.63, 0.84));
+	Geometry* headPart = new Geometry(sphere, glm::vec3(0.2, 0.2, 0.2));
+	playerBody = new PlayerBody(headPart, bodyPart);
+	player = new Player(playerBody, terrain);
 
 	world->addChild(cubemapS);
 	cubemapS->addChild(cubemap);
-	world->addChild(terrain);
 	world->addChild(stageOffset);
 	stageOffset->addChild(stageS);
 	stageOffset->addChild(orbOffset);
@@ -129,7 +132,22 @@ GLFWwindow* Window::create_window(int width, int height)
 #endif
 
 	// Create the GLFW window
-	GLFWwindow* window = glfwCreateWindow(width, height, window_title, NULL, NULL);
+	GLFWwindow* window;
+	if (fullScreen) {
+		GLFWmonitor* monitor = glfwGetPrimaryMonitor();
+		const GLFWvidmode* mode = glfwGetVideoMode(monitor);
+		glfwWindowHint(GLFW_RED_BITS, mode->redBits);
+		glfwWindowHint(GLFW_GREEN_BITS, mode->greenBits);
+		glfwWindowHint(GLFW_BLUE_BITS, mode->blueBits);
+		glfwWindowHint(GLFW_REFRESH_RATE, mode->refreshRate);
+		window = glfwCreateWindow(mode->width, mode->height, "My Title", monitor, NULL);
+	}
+	else {
+		window = glfwCreateWindow(width, height, window_title, NULL, NULL);
+	}
+
+
+
 
 	// Check if the window could not be created
 	if (!window)
@@ -179,7 +197,7 @@ void Window::idle_callback()
 void Window::display_callback(GLFWwindow* window)
 {
 	if (playerView) {
-		V = regularV;
+		V = player->thirdPersonV;
 	}
 	else {
 		V = regularV;
@@ -190,8 +208,9 @@ void Window::display_callback(GLFWwindow* window)
 	// Use the shader of programID
 	glUseProgram(shaderProgram);
 	sunLight->draw(shaderProgram, glm::mat4(1.0f));
-	//terrain->draw(shaderProgram, glm::mat4(1.0f));
+	terrain->draw(shaderProgram, glm::mat4(1.0f));
 	world->draw(shaderProgram, glm::mat4(1.0f));
+	player->draw(shaderProgram, glm::mat4(1.0f));
 
 	// Gets events, including input such as keyboard and mouse or window resizing
 	glfwPollEvents();
@@ -211,7 +230,7 @@ void Window::key_callback(GLFWwindow* window, int key, int scancode, int action,
 			glfwSetWindowShouldClose(window, GL_TRUE);
 		}
 	}
-	else if (key == GLFW_KEY_W) {
+	else if (key == GLFW_KEY_T) {
 		if (mods == GLFW_MOD_SHIFT) {
 			VM = glm::rotate(VM, glm::radians(-2.0f), glm::vec3(1, 0, 0));
 		}
@@ -221,7 +240,7 @@ void Window::key_callback(GLFWwindow* window, int key, int scancode, int action,
 
 		regularV = VM * VOrig;
 	}
-	else if (key == GLFW_KEY_S) {
+	else if (key == GLFW_KEY_G) {
 		if (mods == GLFW_MOD_SHIFT) {
 			VM = glm::rotate(VM, glm::radians(2.0f), glm::vec3(1, 0, 0));
 		}
@@ -230,7 +249,7 @@ void Window::key_callback(GLFWwindow* window, int key, int scancode, int action,
 		}
 		regularV = VM * VOrig;
 	}
-	else if (key == GLFW_KEY_A) {
+	else if (key == GLFW_KEY_F) {
 		if (mods == GLFW_MOD_SHIFT) {
 			VM = glm::rotate(VM, glm::radians(-2.0f), glm::vec3(0, 1, 0));
 		}
@@ -239,7 +258,7 @@ void Window::key_callback(GLFWwindow* window, int key, int scancode, int action,
 		}
 		regularV = VM * VOrig;
 	}
-	else if (key == GLFW_KEY_D) {
+	else if (key == GLFW_KEY_H) {
 		if (mods == GLFW_MOD_SHIFT) {
 			VM = glm::rotate(VM, glm::radians(2.0f), glm::vec3(0, 1, 0));
 		}
@@ -248,11 +267,11 @@ void Window::key_callback(GLFWwindow* window, int key, int scancode, int action,
 		}
 		regularV = VM * VOrig;
 	}
-	else if (key == GLFW_KEY_E) {
+	else if (key == GLFW_KEY_R) {
 		VM = glm::translate(VM, glm::vec3(0, -0.8f, 0));
 		regularV = VM * VOrig;
 	}
-	else if (key == GLFW_KEY_Q) {
+	else if (key == GLFW_KEY_Y) {
 		VM = glm::translate(VM, glm::vec3(0, 0.8f, 0));
 		regularV = VM * VOrig;
 	}
@@ -260,17 +279,34 @@ void Window::key_callback(GLFWwindow* window, int key, int scancode, int action,
 		if (mods == GLFW_MOD_SHIFT) {
 			seed--;
 			delete(terrain);
-			terrain = new Terrain(terrainSize, terrainSize, 1, objects);
+			initializeTerrain();
 		}
 		else {
 			seed++;
 			delete(terrain);
-			terrain = new Terrain(terrainSize, terrainSize, 1, objects);
+			initializeTerrain();
 		}
 		regularV = VM * VOrig;
 	}
 	else if (key == GLFW_KEY_2) {
 		terrain->switchSpreading();
+	}
+
+	else if (key == GLFW_KEY_W) {
+		player->move(0);
+	}
+	else if (key == GLFW_KEY_D) {
+		player->move(1);
+	}
+	else if (key == GLFW_KEY_S) {
+		player->move(2);
+	}
+	else if (key == GLFW_KEY_A) {
+		player->move(3);
+	}
+
+	else if (key == GLFW_KEY_X) {
+		playerView = !playerView;
 	}
 }
 
@@ -282,7 +318,7 @@ void Window::mouse_callback(GLFWwindow* window, int button, int action, int mods
 			double y;
 			lbutton_down = true;
 			glfwGetCursorPos(window, &x, &y);
-			lastPoint = trackBallMapping(window, x, y);
+			lastTrackBallPoint = trackBallMapping(window, x, y);
 		}
 		else if (GLFW_RELEASE == action) {
 			lbutton_down = false;
@@ -291,17 +327,27 @@ void Window::mouse_callback(GLFWwindow* window, int button, int action, int mods
 }
 
 void Window::cursor_pos_callback(GLFWwindow* window, double xpos, double ypos) {
-	if (lbutton_down) {
-		curPoint = trackBallMapping(window, xpos, ypos);
-		float velocity = glm::sqrt(glm::dot((curPoint - lastPoint), (curPoint - lastPoint)));
+	if (!playerView && lbutton_down) {
+		curTrackBallPoint = trackBallMapping(window, xpos, ypos);
+		float velocity = glm::sqrt(glm::dot((curTrackBallPoint - lastTrackBallPoint), (curTrackBallPoint - lastTrackBallPoint)));
 		if (velocity > 0.0001) {
-			glm::vec3 rotAxis = glm::cross(lastPoint, curPoint);
-			float rotAngle = glm::acos(glm::dot(lastPoint, curPoint) / (length(lastPoint) * length(curPoint)));
+			glm::vec3 rotAxis = glm::cross(lastTrackBallPoint, curTrackBallPoint);
+			float rotAngle = glm::acos(glm::dot(lastTrackBallPoint, curTrackBallPoint) / (length(lastTrackBallPoint) * length(curTrackBallPoint)));
 			VM = glm::rotate(VM, rotAngle / 3, rotAxis);
 			regularV = VM * VOrig;
 		}
 
-		lastPoint = curPoint;
+		lastTrackBallPoint = curTrackBallPoint;
+	}
+	else if (playerView) {
+		curMousePos.x = xpos;
+		curMousePos.y = ypos;
+		float xdiff = curMousePos.x - lastMousePos.x;
+		float ydiff = curMousePos.y - lastMousePos.y;
+		player->cam_rotateX = glm::rotate(player->cam_rotateX, -xdiff / 200, glm::vec3(0, 1, 0));
+		player->cam_rotateY = glm::rotate(player->cam_rotateY, -ydiff / 400, glm::vec3(0, 0, 1));
+		player->update();
+		lastMousePos = curMousePos;
 	}
 }
 
@@ -319,6 +365,13 @@ glm::vec3 Window::trackBallMapping(GLFWwindow* window, double x, double y)
 	return glm::normalize(v);  // Still need to normalize, since we only capped d, not v. Return the mouse location on the surface of the trackball
 }
 
-void Window::drawLine(GLuint shaderProgram, glm::mat4 M) {
+void Window::initializeTerrain() {
+	Geometry* object1 = new Geometry(cylinder, glm::vec3(0.7, 0, 0));
+	Geometry* object2 = new Geometry(cylinder, glm::vec3(0, 0.7, 0));
+	Geometry* object3 = new Geometry(cylinder, glm::vec3(0, 0, 0.7));
+	objects.push_back(std::make_pair(object1, 20));
+	objects.push_back(std::make_pair(object2, 20));
+	objects.push_back(std::make_pair(object3, 10));
 
+	terrain = new Terrain(terrainSize, terrainSize, 1, objects);
 }

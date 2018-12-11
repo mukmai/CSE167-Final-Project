@@ -44,6 +44,9 @@ Terrain::~Terrain()
 	glDeleteVertexArrays(1, &VAO);
 	glDeleteBuffers(1, &VBO);
 	glDeleteBuffers(1, &VBO2);
+	for (auto it = childrenList.begin(); it != childrenList.end(); ++it) {
+		delete(*it);
+	}
 }
 
 void Terrain::draw(GLuint shaderProgram, glm::mat4 C) {
@@ -247,4 +250,17 @@ void Terrain::generateObjectPosition(Node* object, int amount) {
 
 void Terrain::switchSpreading() {
 	spread = !spread;
+}
+
+glm::vec3 Terrain::getPosition(glm::vec2 coord) {
+	float tx = fmod(coord.x, 1);
+	float ty = fmod(coord.y, 1);
+	glm::vec3 p0 = terrainVertices[coord.x / 1][coord.y / 1];
+	glm::vec3 p1 = terrainVertices[coord.x / 1][coord.y / 1 + 1];
+	glm::vec3 p2 = terrainVertices[coord.x / 1 + 1][coord.y / 1];
+	glm::vec3 p3 = terrainVertices[coord.x / 1 + 1][coord.y / 1 + 1];
+	glm::vec3 q0 = p0 + ty * (p1 - p0);
+	glm::vec3 q1 = p2 + ty * (p3 - p2);
+	glm::vec3 r = q0 + tx * (q1 - q0);
+	return r;
 }

@@ -20,6 +20,7 @@ public:
 	void rotate(glm::mat4 R);
 	void scale(glm::vec3 scalar);
 	void translate(glm::vec3 pt);
+	void set(glm::mat4 C);
 };
 
 #endif

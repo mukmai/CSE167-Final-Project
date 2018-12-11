@@ -48,3 +48,7 @@ void Transform::scale(glm::vec3 scalar) {
 void Transform::translate(glm::vec3 pt) {
 	M = glm::translate(M, pt);
 }
+
+void Transform::set(glm::mat4 C) {
+	M = C;
+}

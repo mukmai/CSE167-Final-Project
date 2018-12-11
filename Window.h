@@ -19,6 +19,8 @@
 #include "OBJObject.h"
 #include "LightSource.h"
 #include "Terrain.h"
+#include "Player.h"
+#include "PlayerBody.h"
 
 class Window
 {
@@ -39,7 +41,7 @@ public:
 	static void mouse_callback(GLFWwindow* window, int button, int action, int mods);
 	static void cursor_pos_callback(GLFWwindow* window, double xpos, double ypos);
 	static glm::vec3 trackBallMapping(GLFWwindow* window, double x, double y);
-	static void drawLine(GLuint shaderProgram, glm::mat4 M);
+	static void initializeTerrain();
 };
 
 #endif

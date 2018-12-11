@@ -25,6 +25,8 @@
     <ClInclude Include="..\main.h" />
     <ClInclude Include="..\Node.h" />
     <ClInclude Include="..\OBJObject.h" />
+    <ClInclude Include="..\Player.h" />
+    <ClInclude Include="..\PlayerBody.h" />
     <ClInclude Include="..\Project3-texture.h" />
     <ClInclude Include="..\shader.h" />
     <ClInclude Include="..\Terrain.h" />
@@ -38,6 +40,8 @@
     <ClCompile Include="..\main.cpp" />
     <ClCompile Include="..\Node.cpp" />
     <ClCompile Include="..\OBJObject.cpp" />
+    <ClCompile Include="..\Player.cpp" />
+    <ClCompile Include="..\PlayerBody.cpp" />
     <ClCompile Include="..\Project3-texture.cpp" />
     <ClCompile Include="..\shader.cpp" />
     <ClCompile Include="..\Terrain.cpp" />

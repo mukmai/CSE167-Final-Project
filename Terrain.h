@@ -13,7 +13,7 @@ private:
 	std::vector<std::vector<glm::vec3>> terrainVertices;
 	std::vector<std::vector<glm::vec3>> terrainNormals;
 	float distance;
-	int row, col, grassRadius;
+	int grassRadius;
 	std::vector<glm::vec3> vertices_;
 	std::vector<glm::vec3> normals_;
 	std::vector<std::vector<float>> perlinNoiseSeed;
@@ -38,9 +38,10 @@ public:
 	void setStagePlane();
 	void generateObjectPosition(Node* object, int amount);
 	void switchSpreading();
+	glm::vec3 getPosition(glm::vec2 coord);
 
 	GLuint VBO, VBO2, VAO;
-
+	int row, col;
 };
 
 #endif

@@ -19,6 +19,7 @@ void setup_callbacks()
 	// Set the mouse callback
 	glfwSetMouseButtonCallback(window, Window::mouse_callback);
 	// Set the cursor position callback
+	glfwSetInputMode(window, GLFW_CURSOR, GLFW_CURSOR_DISABLED);
 	glfwSetCursorPosCallback(window, Window::cursor_pos_callback);
 }
 
