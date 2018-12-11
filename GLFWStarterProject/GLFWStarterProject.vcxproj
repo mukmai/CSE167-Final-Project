@@ -22,6 +22,7 @@
     <ClInclude Include="..\CubeMap.h" />
     <ClInclude Include="..\Geometry.h" />
     <ClInclude Include="..\LightSource.h" />
+    <ClInclude Include="..\LSystem.h" />
     <ClInclude Include="..\main.h" />
     <ClInclude Include="..\Node.h" />
     <ClInclude Include="..\OBJObject.h" />
@@ -37,6 +38,7 @@
     <ClCompile Include="..\CubeMap.cpp" />
     <ClCompile Include="..\Geometry.cpp" />
     <ClCompile Include="..\LightSource.cpp" />
+    <ClCompile Include="..\LSystem.cpp" />
     <ClCompile Include="..\main.cpp" />
     <ClCompile Include="..\Node.cpp" />
     <ClCompile Include="..\OBJObject.cpp" />
