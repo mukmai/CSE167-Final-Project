@@ -196,6 +196,7 @@ void OBJObject::parseSorted(const char *filepath)
 		// Check end of file
 		if (c1 == EOF) { break; }
 		c2 = fgetc(fp);
+
 		// Check if current line is vertex
 		if (c1 == 'v' && c2 == ' ') {
 			glm::vec3 currV;

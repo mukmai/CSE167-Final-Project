@@ -21,6 +21,7 @@
 #include "Terrain.h"
 #include "Player.h"
 #include "PlayerBody.h"
+#include "ParticleManager.h"
 
 class Window
 {

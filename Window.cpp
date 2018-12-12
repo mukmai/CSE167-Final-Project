@@ -13,6 +13,7 @@ Transform* cubemapS;
 Transform* stageOffset;
 Transform* stageS;
 Transform* orbOffset;
+Transform* particlePlacement;
 
 Geometry* orb;
 Geometry* stage;
@@ -21,6 +22,8 @@ LightSource* sunLight;
 Terrain* terrain;
 int terrainSize = 256;
 unsigned int Window::seed = 4;
+
+ParticleManager* particles;
 
 std::vector<std::pair<Node*, int>> objects;
 
@@ -77,6 +80,9 @@ void Window::initialize_objects()
 	stageOffset = new Transform(glm::translate(glm::mat4(1.0f), glm::vec3(0,-0.5,0)));
 	stageS = new Transform(glm::scale(glm::mat4(1.0f), glm::vec3(5,1,5)));
 	orbOffset = new Transform(glm::translate(glm::mat4(1.0f), glm::vec3(0, 5, 0)));
+	
+	// where the particle system begins generating particles
+	particlePlacement = new Transform(glm::mat4(1.0f));
 
 	cubemap = new CubeMap(textureFiles);
 
@@ -89,6 +95,10 @@ void Window::initialize_objects()
 	playerBody = new PlayerBody(headPart, bodyPart);
 	player = new Player(playerBody, terrain);
 
+	// actual particle generation system
+	Geometry* particleShape = new Geometry(sphere, glm::vec3(0.95f, 0.75f, 0.38f));
+	particles = new ParticleManager(10000, particleShape);
+
 	world->addChild(cubemapS);
 	cubemapS->addChild(cubemap);
 	world->addChild(stageOffset);
@@ -97,6 +107,8 @@ void Window::initialize_objects()
 	orbOffset->addChild(orb);
 
 	stageS->addChild(stage);
+
+	world->addChild(particles);
 
 	// Load the shader program. Make sure you have the correct filepath up top
 	shaderProgram = LoadShaders(VERTEX_SHADER_PATH, FRAGMENT_SHADER_PATH);
@@ -192,6 +204,7 @@ void Window::resize_callback(GLFWwindow* window, int width, int height)
 
 void Window::idle_callback()
 {
+	particles->update();
 }
 
 void Window::display_callback(GLFWwindow* window)
@@ -211,6 +224,8 @@ void Window::display_callback(GLFWwindow* window)
 	terrain->draw(shaderProgram, glm::mat4(1.0f));
 	world->draw(shaderProgram, glm::mat4(1.0f));
 	player->draw(shaderProgram, glm::mat4(1.0f));
+
+	particles->draw(shaderProgram, glm::mat4(1.0f));
 
 	// Gets events, including input such as keyboard and mouse or window resizing
 	glfwPollEvents();
