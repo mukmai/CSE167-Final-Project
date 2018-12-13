@@ -60,14 +60,14 @@
     <ClInclude Include="..\ParticleManager.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-<<<<<<< HEAD
+
     <ClInclude Include="..\Totem.h">
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="..\TotemPart.h">
-=======
+
     <ClInclude Include="..\LSystem.h">
->>>>>>> acf0fd61dd86eced4c82e98e7af99cc5b5f296ab
+
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>
@@ -117,14 +117,14 @@
     <ClCompile Include="..\ParticleManager.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-<<<<<<< HEAD
+
     <ClCompile Include="..\Totem.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="..\TotemPart.cpp">
-=======
+
     <ClCompile Include="..\LSystem.cpp">
->>>>>>> acf0fd61dd86eced4c82e98e7af99cc5b5f296ab
+
       <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>
