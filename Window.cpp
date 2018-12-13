@@ -2,7 +2,7 @@
 
 const char* window_title = "GLFW Starter Project";
 bool fullScreen = true;
-bool playerView = true;
+bool Window::playerView = true;
 
 LSystem* mainTree;
 

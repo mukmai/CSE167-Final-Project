@@ -1,5 +1,6 @@
 #include "Player.h"
 
+glm::vec3 Player::cam_pos = glm::vec3(0,0,0);
 Player::Player(PlayerBody* playerBody, Terrain* terrain)
 {
 	this->terrain = terrain;

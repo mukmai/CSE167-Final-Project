@@ -152,6 +152,8 @@ void LSystem::draw(GLuint shaderProgram, glm::mat4 C) {
 	glUniformMatrix4fv(glGetUniformLocation(shaderProgram, "model"), 1, GL_FALSE, &C[0][0]);
 	glUniform1i(glGetUniformLocation(shaderProgram, "drawType"), 0);
 	glm::vec3 cameraPos = glm::vec3(Window::V[3]);
+	if (Window::playerView)
+		cameraPos = glm::vec3(Player::cam_pos);
 	glUniform3fv(glGetUniformLocation(shaderProgram, "cameraPos"), 1, &cameraPos[0]);
 	glUniform3fv(glGetUniformLocation(shaderProgram, "material.diffuse"), 1, &woodDiffuse[0]);
 
