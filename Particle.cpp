@@ -2,7 +2,7 @@
 #include "Window.h"
 #include <time.h>
 
-Particle::Particle(glm::vec3 pos, Geometry* particleShape)
+Particle::Particle()
 {
 	srand(time(NULL));
 
@@ -10,10 +10,7 @@ Particle::Particle(glm::vec3 pos, Geometry* particleShape)
 	this->position = glm::vec4(-1 * (rand() % 100) - 30, -10.0f, -1 * (rand() % 100) - 30, 0.0f);
 	this->velocity = glm::vec3(-1.0f * (rand() % 10), -1.0, -1.0f * (rand() % 10));
 	this->life = (rand() % 100) / 100.0;
-	this->delta = 0.001f;
-
-	// position of the particle
-	transform = new Transform(glm::mat4(1.0f));
+	this->delta = 0.05f;
 }
 
 Particle::~Particle()
@@ -22,7 +19,7 @@ Particle::~Particle()
 
 void Particle::draw(GLuint shaderProgram, glm::mat4 C)
 { 
-	glPointSize(2.0f);
+	glPointSize(2.5f);
 
 	// only draw if alive
 	if (this->life > 0.0f) {

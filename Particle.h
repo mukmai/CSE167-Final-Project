@@ -25,7 +25,7 @@ class Particle :
 	public Node
 {
 public:
-	Particle(glm::vec3 pos, Geometry* particleShape);
+	Particle();
 	~Particle();
 
 	void draw(GLuint, glm::mat4);

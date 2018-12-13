@@ -34,14 +34,20 @@ private:
 
 	std::vector<Particle*> particles;
 
+	int respawnRate;
+	bool particlesOn;
+
 public:
-	ParticleManager(int amount, Geometry* particleShape);
+	ParticleManager(int amount);
 	~ParticleManager();
 
 	glm::mat4 toWorld;
 
 	void draw(GLuint shaderProgram, glm::mat4 C);
 	void update();
+	void toggleParticles();
+	void turnParticlesOff();
+	void turnParticlesOn();
 
 };
 

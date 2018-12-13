@@ -40,6 +40,12 @@ TotemPart::TotemPart(TotemPart* toCopy) {
 
 TotemPart::~TotemPart()
 {
+	delete(transform);
+	delete(top);
+	delete(bottom);
+	delete(left);
+	delete(right);
+	delete(mouth);
 }
 
 int TotemPart::getId() {

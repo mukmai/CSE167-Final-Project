@@ -28,8 +28,25 @@ Totem::Totem(std::vector<TotemPart*> totemParts, int counterVal) {
 
 Totem::~Totem() 
 {
+	delete(transform);
 	for (int i = 0; i < this->parts.size(); i++) {
 		delete(parts[i]);
+	}
+	//being triply sure
+	for (int i = 0; i < top.size(); i++) {
+		delete(top[i]);
+	}
+	for (int i = 0; i < bottom.size(); i++) {
+		delete(bottom[i]);
+	}
+	for (int i = 0; i < left.size(); i++) {
+		delete(left[i]);
+	}
+	for (int i = 0; i < right.size(); i++) {
+		delete(right[i]);
+	}
+	for (int i = 0; i < mouth.size(); i++) {
+		delete(mouth[i]);
 	}
 }
 
@@ -42,6 +59,7 @@ void Totem::generateTotem(int counterVal) {
 
 	std::vector<TotemPart*> queue;
 	queue.push_back(basePiece);
+	parts.push_back(basePiece);
 
 	// prevent building infinite structures
 	int counter = 0;
@@ -63,6 +81,12 @@ void Totem::generateTotem(int counterVal) {
 		TotemPart* randomLeft = getRandomLeft();
 		TotemPart* randomRight = getRandomRight();
 		TotemPart* randomMouth = getRandomMouth();
+		
+		parts.push_back(randomTop);
+		parts.push_back(randomBottom);
+		parts.push_back(randomLeft);
+		parts.push_back(randomRight);
+		parts.push_back(randomMouth);
 
 		// assignment status. this will prevent us from attempting to reassign pointers
 		assignedTop = currentPiece->setTop(randomTop);
