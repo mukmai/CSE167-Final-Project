@@ -49,6 +49,7 @@ public:
 	static void cursor_pos_callback(GLFWwindow* window, double xpos, double ypos);
 	static glm::vec3 trackBallMapping(GLFWwindow* window, double x, double y);
 	static void initializeTerrain();
+	static void initializeTotem();
 private:
 	const static int BODY_NOWING_NOMOUTH = 0;
 	const static int BODY_NOWING_MOUTH = 1;

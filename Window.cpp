@@ -1,7 +1,7 @@
 #include "window.h"
 
 const char* window_title = "GLFW Starter Project";
-bool fullScreen = false;
+bool fullScreen = true;
 bool playerView = true;
 
 LSystem* mainTree;
@@ -17,6 +17,7 @@ Transform* stageOffset;
 Transform* stageS;
 Transform* orbOffset;
 Transform* particlePlacement;
+Transform* mainTreeS;
 
 Geometry* orb;
 Geometry* stage;
@@ -31,6 +32,9 @@ unsigned int Window::seed = 4;
 ParticleManager* particles;
 
 std::vector<std::pair<Node*, int>> objects;
+
+bool spreadMode = false;
+float growRatio = 0;
 
 Player* player;
 PlayerBody* playerBody;
@@ -101,23 +105,395 @@ void Window::initialize_objects()
 	// where the particle system begins generating particles
 	particlePlacement = new Transform(glm::mat4(1.0f));
 
+	initializeTotem();
+
+	cubemap = new CubeMap(textureFiles);
+
+	initializeTerrain();
+
+	sunLight = new LightSource(glm::vec3(0.5, 0.47, 0.35), glm::vec3(0, -1, 2));
+
+	Geometry* bodyPart = new Geometry(cylinder, glm::vec3(0.54, 0.42, 0.12));
+	Geometry* headPart = new Geometry(sphere, glm::vec3(0.99, 0.89, 0.72));
+	Geometry* limbPart = new Geometry(limb, glm::vec3(0.54, 0.42, 0.12));
+	playerBody = new PlayerBody(headPart, bodyPart, limbPart);
+	player = new Player(playerBody, terrain);
+
+	// actual particle generation system
+	Geometry* particleShape = new Geometry(sphere, glm::vec3(0.95f, 0.75f, 0.38f));
+	particles = new ParticleManager(10000, particleShape);
+	//particles->transform->translate(glm::vec3(0, 10, 0));
+
+	world->addChild(cubemapS);
+	cubemapS->addChild(cubemap);
+	world->addChild(stageOffset);
+	stageOffset->addChild(stageS);
+	stageOffset->addChild(orbOffset);
+	orbOffset->addChild(orb);
+
+	mainTree = new LSystem(2, 7);
+	mainTreeS = new Transform(glm::scale(glm::mat4(1.0f), glm::vec3(growRatio)));
+	Transform* treeR1 = new Transform(glm::rotate(glm::mat4(1.0f), -glm::radians(60.0f), glm::vec3(0.0f, 1.0f, 0.0f)));
+	Transform* treeR2 = new Transform(glm::rotate(glm::mat4(1.0f), -glm::radians(120.0f), glm::vec3(0.0f, 1.0f, 0.0f)));
+	treeR1->addChild(mainTree);
+	treeR2->addChild(mainTree);
+	stageOffset->addChild(mainTreeS);
+	mainTreeS->addChild(mainTree);
+	mainTreeS->addChild(treeR1);
+	mainTreeS->addChild(treeR2);
+	
+
+	stageS->addChild(stage);
+
+	world->addChild(particles);
+
+	// Load the shader program. Make sure you have the correct filepath up top
+	shaderProgram = LoadShaders(VERTEX_SHADER_PATH, FRAGMENT_SHADER_PATH);
+	printf("completed initialize\n");
+}
+
+// Treat this as a destructor function. Delete dynamically allocated memory here.
+void Window::clean_up()
+{
+	glDeleteProgram(shaderProgram);
+	delete(world);
+	delete(sunLight);
+	delete(player);
+	delete(terrain);
+}
+
+GLFWwindow* Window::create_window(int width, int height)
+{
+	// Initialize GLFW
+	if (!glfwInit())
+	{
+		fprintf(stderr, "Failed to initialize GLFW\n");
+		return NULL;
+	}
+
+	// 4x antialiasing
+	glfwWindowHint(GLFW_SAMPLES, 4);
+
+#ifdef __APPLE__ // Because Apple hates comforming to standards
+	// Ensure that minimum OpenGL version is 3.3
+	glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 3);
+	glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 3);
+	// Enable forward compatibility and allow a modern OpenGL context
+	glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_CORE_PROFILE);
+	glfwWindowHint(GLFW_OPENGL_FORWARD_COMPAT, GL_TRUE);
+#endif
+
+	// Create the GLFW window
+	GLFWwindow* window;
+	if (fullScreen) {
+		GLFWmonitor* monitor = glfwGetPrimaryMonitor();
+		const GLFWvidmode* mode = glfwGetVideoMode(monitor);
+		glfwWindowHint(GLFW_RED_BITS, mode->redBits);
+		glfwWindowHint(GLFW_GREEN_BITS, mode->greenBits);
+		glfwWindowHint(GLFW_BLUE_BITS, mode->blueBits);
+		glfwWindowHint(GLFW_REFRESH_RATE, mode->refreshRate);
+		window = glfwCreateWindow(mode->width, mode->height, "My Title", monitor, NULL);
+	}
+	else {
+		window = glfwCreateWindow(width, height, window_title, NULL, NULL);
+	}
+
+	// Check if the window could not be created
+	if (!window)
+	{
+		fprintf(stderr, "Failed to open GLFW window.\n");
+		fprintf(stderr, "Either GLFW is not installed or your graphics card does not support modern OpenGL.\n");
+		glfwTerminate();
+		return NULL;
+	}
+
+	// Make the context of the window
+	glfwMakeContextCurrent(window);
+
+	// Set swap interval to 1
+	glfwSwapInterval(1);
+
+	// Get the width and height of the framebuffer to properly resize the window
+	glfwGetFramebufferSize(window, &width, &height);
+	// Call the resize callback to make sure things get drawn immediately
+	Window::resize_callback(window, width, height);
+
+	return window;
+}
+
+void Window::resize_callback(GLFWwindow* window, int width, int height)
+{
+#ifdef __APPLE__
+	glfwGetFramebufferSize(window, &width, &height); // In case your Mac has a retina display
+#endif
+	Window::width = width;
+	Window::height = height;
+	// Set the viewport size. This is the only matrix that OpenGL maintains for us in modern OpenGL!
+	glViewport(0, 0, width, height);
+
+	if (height > 0)
+	{
+		P = glm::perspective(45.0f, (float)width / (float)height, 0.1f, 1000.0f);
+		VOrig = glm::lookAt(cam_pos, cam_look_at, cam_up);
+		regularV = VM * VOrig;
+	}
+}
+
+void Window::idle_callback()
+{
+	particles->update();
+	playerBody->update();
+	if (spreadMode && growRatio < 1) {
+		growRatio += 0.01;
+		mainTreeS->set(glm::scale(glm::mat4(1.0f), glm::vec3(growRatio)));
+	}
+	else if (!spreadMode && growRatio > 0) {
+		growRatio -= 0.01;
+		mainTreeS->set(glm::scale(glm::mat4(1.0f), glm::vec3(growRatio)));
+	}
+}
+
+void Window::display_callback(GLFWwindow* window)
+{
+	if (playerView) {
+		V = player->thirdPersonV;
+	}
+	else {
+		V = regularV;
+	}
+	// Clear the color and depth buffers
+	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+
+	// Use the shader of programID
+	glUseProgram(shaderProgram);
+	sunLight->draw(shaderProgram, glm::mat4(1.0f));
+	terrain->draw(shaderProgram, glm::mat4(1.0f));
+	LSystem::leafSwitch = true;
+	world->draw(shaderProgram, glm::mat4(1.0f));
+	LSystem::leafSwitch = false;
+	player->draw(shaderProgram, glm::mat4(1.0f));
+
+	particles->draw(shaderProgram, glm::mat4(1.0f));
+
+	// Gets events, including input such as keyboard and mouse or window resizing
+	glfwPollEvents();
+	// Swap buffers
+	glfwSwapBuffers(window);
+}
+
+void Window::key_callback(GLFWwindow* window, int key, int scancode, int action, int mods)
+{
+	// Check for a key press
+	if (action == GLFW_PRESS)
+	{
+		// Check if escape was pressed
+		if (key == GLFW_KEY_ESCAPE)
+		{
+			// Close the window. This causes the program to also terminate.
+			glfwSetWindowShouldClose(window, GL_TRUE);
+		}
+	}
+	else if (key == GLFW_KEY_T) {
+		if (mods == GLFW_MOD_SHIFT) {
+			VM = glm::rotate(VM, glm::radians(-2.0f), glm::vec3(1, 0, 0));
+		}
+		else {
+			VM = glm::translate(VM, glm::vec3(0, 0, 0.8f));
+		}
+
+		regularV = VM * VOrig;
+	}
+	else if (key == GLFW_KEY_G) {
+		if (mods == GLFW_MOD_SHIFT) {
+			VM = glm::rotate(VM, glm::radians(2.0f), glm::vec3(1, 0, 0));
+		}
+		else {
+			VM = glm::translate(VM, glm::vec3(0, 0, -0.8f));
+		}
+		regularV = VM * VOrig;
+	}
+	else if (key == GLFW_KEY_F) {
+		if (mods == GLFW_MOD_SHIFT) {
+			VM = glm::rotate(VM, glm::radians(-2.0f), glm::vec3(0, 1, 0));
+		}
+		else {
+			VM = glm::translate(VM, glm::vec3(0.8f, 0, 0));
+		}
+		regularV = VM * VOrig;
+	}
+	else if (key == GLFW_KEY_H) {
+		if (mods == GLFW_MOD_SHIFT) {
+			VM = glm::rotate(VM, glm::radians(2.0f), glm::vec3(0, 1, 0));
+		}
+		else {
+			VM = glm::translate(VM, glm::vec3(-0.8f, 0, 0));
+		}
+		regularV = VM * VOrig;
+	}
+	else if (key == GLFW_KEY_R) {
+		VM = glm::translate(VM, glm::vec3(0, -0.8f, 0));
+		regularV = VM * VOrig;
+	}
+	else if (key == GLFW_KEY_Y) {
+		VM = glm::translate(VM, glm::vec3(0, 0.8f, 0));
+		regularV = VM * VOrig;
+	}
+	else if (key == GLFW_KEY_1) {
+		if (mods == GLFW_MOD_SHIFT) {
+			seed--;
+			delete(terrain);
+			initializeTerrain();
+			player->terrain = terrain;
+			player->update();
+		}
+		else {
+			seed++;
+			delete(terrain);
+			initializeTerrain();
+			player->terrain = terrain;
+			player->update();
+		}
+		regularV = VM * VOrig;
+	}
+	else if (key == GLFW_KEY_2) {
+		terrain->switchSpreading();
+		spreadMode = !spreadMode;
+	}
+
+	else if (key == GLFW_KEY_W) {
+		if (action == GLFW_RELEASE) {
+			playerBody->moving = false;
+		}
+		else {
+			player->move(0);
+		}
+	}
+	else if (key == GLFW_KEY_D) {
+		if (action == GLFW_RELEASE) {
+			playerBody->moving = false;
+		}
+		else {
+			player->move(1);
+		}
+		player->move(1);
+	}
+	else if (key == GLFW_KEY_S) {
+		if (action == GLFW_RELEASE) {
+			playerBody->moving = false;
+		}
+		else {
+			player->move(2);
+		}
+	}
+	else if (key == GLFW_KEY_A) {
+		if (action == GLFW_RELEASE) {
+			playerBody->moving = false;
+		}
+		else {
+			player->move(3);
+		}
+	}
+
+	else if (key == GLFW_KEY_X) {
+		playerView = !playerView;
+	}
+}
+
+void Window::mouse_callback(GLFWwindow* window, int button, int action, int mods)
+{
+	if (button == GLFW_MOUSE_BUTTON_LEFT) {
+		if (GLFW_PRESS == action) {
+			double x;
+			double y;
+			lbutton_down = true;
+			glfwGetCursorPos(window, &x, &y);
+			lastTrackBallPoint = trackBallMapping(window, x, y);
+		}
+		else if (GLFW_RELEASE == action) {
+			lbutton_down = false;
+		}
+	}
+}
+
+void Window::cursor_pos_callback(GLFWwindow* window, double xpos, double ypos) {
+	if (!playerView && lbutton_down) {
+		curTrackBallPoint = trackBallMapping(window, xpos, ypos);
+		float velocity = glm::sqrt(glm::dot((curTrackBallPoint - lastTrackBallPoint), (curTrackBallPoint - lastTrackBallPoint)));
+		if (velocity > 0.0001) {
+			glm::vec3 rotAxis = glm::cross(lastTrackBallPoint, curTrackBallPoint);
+			float rotAngle = glm::acos(glm::dot(lastTrackBallPoint, curTrackBallPoint) / (length(lastTrackBallPoint) * length(curTrackBallPoint)));
+			VM = glm::rotate(VM, rotAngle / 3, rotAxis);
+			regularV = VM * VOrig;
+		}
+
+		lastTrackBallPoint = curTrackBallPoint;
+	}
+	else if (playerView) {
+		curMousePos.x = xpos;
+		curMousePos.y = ypos;
+		float xdiff = curMousePos.x - lastMousePos.x;
+		float ydiff = curMousePos.y - lastMousePos.y;
+		player->cam_rotateX = glm::rotate(player->cam_rotateX, -xdiff / 200, glm::vec3(0, 1, 0));
+		player->cam_rotateY = glm::rotate(player->cam_rotateY, -ydiff / 400, glm::vec3(0, 0, 1));
+		player->update();
+		lastMousePos = curMousePos;
+	}
+}
+
+glm::vec3 Window::trackBallMapping(GLFWwindow* window, double x, double y)
+{
+	glm::vec3 v;    // Vector v is the synthesized 3D position of the mouse location on the trackball
+	float d;     // this is the depth of the mouse location: the delta between the plane through the center of the trackball and the z position of the mouse
+	int width, height;
+	glfwGetWindowSize(window, &width, &height);
+	v.x = (2.0f * x - width) / width;   // this calculates the mouse X position in trackball coordinates, which range from -1 to +1
+	v.y = (height - 2.0f * y) / height;   // this does the equivalent to the above for the mouse Y position
+	d = glm::length(v);    // this is the distance from the trackball's origin to the mouse location, without considering depth (=in the plane of the trackball's origin)
+	d = (d < 1.0f) ? d : 1.0f;   // this limits d to values of 1.0 or less to avoid square roots of negative values in the following line
+	v.z = sqrtf(1.001f - d * d);  // this calculates the Z coordinate of the mouse position on the trackball, based on Pythagoras: v.z*v.z + d*d = 1*1
+	return glm::normalize(v);  // Still need to normalize, since we only capped d, not v. Return the mouse location on the surface of the trackball
+}
+
+void Window::initializeTerrain() {
+	// totems and their constituent parts
+	Totem* totemA = new Totem(totemParts, 0);
+	Totem* totemB = new Totem(totemParts, 1);
+	Totem* totemC = new Totem(totemParts, 2);
+
+	objects.push_back(std::make_pair(totemA, 1));
+	objects.push_back(std::make_pair(totemB, 1));
+	objects.push_back(std::make_pair(totemC, 1));
+
+	LSystem* object1 = new LSystem(0, 4);
+	LSystem* object2 = new LSystem(1, 3);
+	LSystem* object3 = new LSystem(0, 5);
+	objects.push_back(std::make_pair(object1, 5));
+	objects.push_back(std::make_pair(object2, 10));
+	objects.push_back(std::make_pair(object3, 4));
+
+	terrain = new Terrain(terrainSize, terrainSize, 1, objects);
+}
+
+void Window::initializeTotem()
+{
+
 	// a collection of totem parts to be used in the totem constructor
 	// currently just uses cylindars and spheres, will produce more geometries later
 	// These do not have to actually be moved, just keeping them as identity matrices should be enough 
 	// unless there should be some squishing or flipping
 	// geometries (color coded for convenience)
-	Geometry* totemBody = new Geometry(cylinder, glm::vec3(242/255.0, 242/255.0, 242/255.0));
-	Geometry* eagleMouth = new Geometry(sphere, glm::vec3(242/255.0, 242/255.0, 242/255.0));
-	Geometry* lizardMouth = new Geometry(sphere, glm::vec3(242/255.0, 242/255.0, 242/255.0));
-	Geometry* whaleMouth = new Geometry(sphere, glm::vec3(242/255.0, 242/255.0, 242/255.0));
-	Geometry* eagleWing = new Geometry(sphere, glm::vec3(242/255.0, 242/255.0, 242/255.0));
-	Geometry* albatrossWing = new Geometry(sphere, glm::vec3(38/255.0, 38/255.0, 38/255.0));
-	Geometry* catEars = new Geometry(sphere, glm::vec3(242/255.0, 242/255.0, 242/255.0));
-	Geometry* hatEars = new Geometry(sphere, glm::vec3(242/255.0, 242/255.0, 242/255.0));
+	Geometry* totemBody = new Geometry(cylinder, glm::vec3(242 / 255.0, 242 / 255.0, 242 / 255.0));
+	Geometry* eagleMouth = new Geometry(sphere, glm::vec3(242 / 255.0, 242 / 255.0, 242 / 255.0));
+	Geometry* lizardMouth = new Geometry(sphere, glm::vec3(242 / 255.0, 242 / 255.0, 242 / 255.0));
+	Geometry* whaleMouth = new Geometry(sphere, glm::vec3(242 / 255.0, 242 / 255.0, 242 / 255.0));
+	Geometry* eagleWing = new Geometry(sphere, glm::vec3(242 / 255.0, 242 / 255.0, 242 / 255.0));
+	Geometry* albatrossWing = new Geometry(sphere, glm::vec3(38 / 255.0, 38 / 255.0, 38 / 255.0));
+	Geometry* catEars = new Geometry(sphere, glm::vec3(242 / 255.0, 242 / 255.0, 242 / 255.0));
+	Geometry* hatEars = new Geometry(sphere, glm::vec3(242 / 255.0, 242 / 255.0, 242 / 255.0));
 
 	Geometry* blackSphere = new Geometry(sphere, glm::vec3(38 / 255.0, 38 / 255.0, 38 / 255.0));
 	Geometry* whiteSphere = new Geometry(sphere, glm::vec3(242 / 255.0, 242 / 255.0, 242 / 255.0));
-	Geometry* redSphere = new Geometry(sphere, glm::vec3(255/255.0, 51/255.0, 0/255.0));
+	Geometry* redSphere = new Geometry(sphere, glm::vec3(255 / 255.0, 51 / 255.0, 0 / 255.0));
 
 	Geometry* blackCylinder = new Geometry(cylinder, glm::vec3(38 / 255.0, 38 / 255.0, 38 / 255.0));
 	Geometry* whiteCylinder = new Geometry(cylinder, glm::vec3(242 / 255.0, 242 / 255.0, 242 / 255.0));
@@ -247,7 +623,7 @@ void Window::initialize_objects()
 	crown->scale(glm::vec3(.6, 2.5, .6));
 	crown->translate(glm::vec3(0, 1.2, 0));
 	blackHat->addChild(crown);
-	
+
 
 	// transforms
 	Transform* totemBodyT = new Transform(glm::mat4(1.0f));
@@ -313,358 +689,4 @@ void Window::initialize_objects()
 	totemParts.push_back(new TotemPart(RIGHT_WING, albatrossWingRT));
 	totemParts.push_back(new TotemPart(EARS, catEarsT));
 	totemParts.push_back(new TotemPart(EARS, hatEarsT));
-
-	cubemap = new CubeMap(textureFiles);
-
-	initializeTerrain();
-
-	sunLight = new LightSource(glm::vec3(0.5, 0.47, 0.35), glm::vec3(0, -1, 2));
-
-	Geometry* bodyPart = new Geometry(cylinder, glm::vec3(0.54, 0.42, 0.12));
-	Geometry* headPart = new Geometry(sphere, glm::vec3(0.99, 0.89, 0.72));
-	Geometry* limbPart = new Geometry(limb, glm::vec3(0.54, 0.42, 0.12));
-	playerBody = new PlayerBody(headPart, bodyPart, limbPart);
-	player = new Player(playerBody, terrain);
-
-	// actual particle generation system
-	Geometry* particleShape = new Geometry(sphere, glm::vec3(0.95f, 0.75f, 0.38f));
-	particles = new ParticleManager(10000, particleShape);
-	//particles->transform->translate(glm::vec3(0, 10, 0));
-
-	world->addChild(cubemapS);
-	cubemapS->addChild(cubemap);
-	world->addChild(stageOffset);
-	stageOffset->addChild(stageS);
-	stageOffset->addChild(orbOffset);
-	orbOffset->addChild(orb);
-
-	mainTree = new LSystem(2, 7);
-	Transform* treeR1 = new Transform(glm::rotate(glm::mat4(1.0f), -glm::radians(60.0f), glm::vec3(0.0f, 1.0f, 0.0f)));
-	Transform* treeR2 = new Transform(glm::rotate(glm::mat4(1.0f), -glm::radians(120.0f), glm::vec3(0.0f, 1.0f, 0.0f)));
-	treeR1->addChild(mainTree);
-	treeR2->addChild(mainTree);
-	stageOffset->addChild(mainTree);
-	stageOffset->addChild(treeR1);
-	stageOffset->addChild(treeR2);
-
-	stageS->addChild(stage);
-
-	world->addChild(particles);
-
-	// Load the shader program. Make sure you have the correct filepath up top
-	shaderProgram = LoadShaders(VERTEX_SHADER_PATH, FRAGMENT_SHADER_PATH);
-	printf("completed initialize\n");
-}
-
-// Treat this as a destructor function. Delete dynamically allocated memory here.
-void Window::clean_up()
-{
-	glDeleteProgram(shaderProgram);
-	delete(world);
-	delete(sunLight);
-	delete(player);
-	delete(terrain);
-}
-
-GLFWwindow* Window::create_window(int width, int height)
-{
-	// Initialize GLFW
-	if (!glfwInit())
-	{
-		fprintf(stderr, "Failed to initialize GLFW\n");
-		return NULL;
-	}
-
-	// 4x antialiasing
-	glfwWindowHint(GLFW_SAMPLES, 4);
-
-#ifdef __APPLE__ // Because Apple hates comforming to standards
-	// Ensure that minimum OpenGL version is 3.3
-	glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 3);
-	glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 3);
-	// Enable forward compatibility and allow a modern OpenGL context
-	glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_CORE_PROFILE);
-	glfwWindowHint(GLFW_OPENGL_FORWARD_COMPAT, GL_TRUE);
-#endif
-
-	// Create the GLFW window
-	GLFWwindow* window;
-	if (fullScreen) {
-		GLFWmonitor* monitor = glfwGetPrimaryMonitor();
-		const GLFWvidmode* mode = glfwGetVideoMode(monitor);
-		glfwWindowHint(GLFW_RED_BITS, mode->redBits);
-		glfwWindowHint(GLFW_GREEN_BITS, mode->greenBits);
-		glfwWindowHint(GLFW_BLUE_BITS, mode->blueBits);
-		glfwWindowHint(GLFW_REFRESH_RATE, mode->refreshRate);
-		window = glfwCreateWindow(mode->width, mode->height, "My Title", monitor, NULL);
-	}
-	else {
-		window = glfwCreateWindow(width, height, window_title, NULL, NULL);
-	}
-
-	// Check if the window could not be created
-	if (!window)
-	{
-		fprintf(stderr, "Failed to open GLFW window.\n");
-		fprintf(stderr, "Either GLFW is not installed or your graphics card does not support modern OpenGL.\n");
-		glfwTerminate();
-		return NULL;
-	}
-
-	// Make the context of the window
-	glfwMakeContextCurrent(window);
-
-	// Set swap interval to 1
-	glfwSwapInterval(1);
-
-	// Get the width and height of the framebuffer to properly resize the window
-	glfwGetFramebufferSize(window, &width, &height);
-	// Call the resize callback to make sure things get drawn immediately
-	Window::resize_callback(window, width, height);
-
-	return window;
-}
-
-void Window::resize_callback(GLFWwindow* window, int width, int height)
-{
-#ifdef __APPLE__
-	glfwGetFramebufferSize(window, &width, &height); // In case your Mac has a retina display
-#endif
-	Window::width = width;
-	Window::height = height;
-	// Set the viewport size. This is the only matrix that OpenGL maintains for us in modern OpenGL!
-	glViewport(0, 0, width, height);
-
-	if (height > 0)
-	{
-		P = glm::perspective(45.0f, (float)width / (float)height, 0.1f, 1000.0f);
-		VOrig = glm::lookAt(cam_pos, cam_look_at, cam_up);
-		regularV = VM * VOrig;
-	}
-}
-
-void Window::idle_callback()
-{
-	particles->update();
-	playerBody->update();
-}
-
-void Window::display_callback(GLFWwindow* window)
-{
-	if (playerView) {
-		V = player->thirdPersonV;
-	}
-	else {
-		V = regularV;
-	}
-	// Clear the color and depth buffers
-	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-
-	// Use the shader of programID
-	glUseProgram(shaderProgram);
-	sunLight->draw(shaderProgram, glm::mat4(1.0f));
-	terrain->draw(shaderProgram, glm::mat4(1.0f));
-	LSystem::leafSwitch = true;
-	world->draw(shaderProgram, glm::mat4(1.0f));
-	LSystem::leafSwitch = false;
-	player->draw(shaderProgram, glm::mat4(1.0f));
-
-	particles->draw(shaderProgram, glm::mat4(1.0f));
-
-	// Gets events, including input such as keyboard and mouse or window resizing
-	glfwPollEvents();
-	// Swap buffers
-	glfwSwapBuffers(window);
-}
-
-void Window::key_callback(GLFWwindow* window, int key, int scancode, int action, int mods)
-{
-	// Check for a key press
-	if (action == GLFW_PRESS)
-	{
-		// Check if escape was pressed
-		if (key == GLFW_KEY_ESCAPE)
-		{
-			// Close the window. This causes the program to also terminate.
-			glfwSetWindowShouldClose(window, GL_TRUE);
-		}
-	}
-	else if (key == GLFW_KEY_T) {
-		if (mods == GLFW_MOD_SHIFT) {
-			VM = glm::rotate(VM, glm::radians(-2.0f), glm::vec3(1, 0, 0));
-		}
-		else {
-			VM = glm::translate(VM, glm::vec3(0, 0, 0.8f));
-		}
-
-		regularV = VM * VOrig;
-	}
-	else if (key == GLFW_KEY_G) {
-		if (mods == GLFW_MOD_SHIFT) {
-			VM = glm::rotate(VM, glm::radians(2.0f), glm::vec3(1, 0, 0));
-		}
-		else {
-			VM = glm::translate(VM, glm::vec3(0, 0, -0.8f));
-		}
-		regularV = VM * VOrig;
-	}
-	else if (key == GLFW_KEY_F) {
-		if (mods == GLFW_MOD_SHIFT) {
-			VM = glm::rotate(VM, glm::radians(-2.0f), glm::vec3(0, 1, 0));
-		}
-		else {
-			VM = glm::translate(VM, glm::vec3(0.8f, 0, 0));
-		}
-		regularV = VM * VOrig;
-	}
-	else if (key == GLFW_KEY_H) {
-		if (mods == GLFW_MOD_SHIFT) {
-			VM = glm::rotate(VM, glm::radians(2.0f), glm::vec3(0, 1, 0));
-		}
-		else {
-			VM = glm::translate(VM, glm::vec3(-0.8f, 0, 0));
-		}
-		regularV = VM * VOrig;
-	}
-	else if (key == GLFW_KEY_R) {
-		VM = glm::translate(VM, glm::vec3(0, -0.8f, 0));
-		regularV = VM * VOrig;
-	}
-	else if (key == GLFW_KEY_Y) {
-		VM = glm::translate(VM, glm::vec3(0, 0.8f, 0));
-		regularV = VM * VOrig;
-	}
-	else if (key == GLFW_KEY_1) {
-		if (mods == GLFW_MOD_SHIFT) {
-			seed--;
-			delete(terrain);
-			initializeTerrain();
-			player->terrain = terrain;
-			player->update();
-		}
-		else {
-			seed++;
-			delete(terrain);
-			initializeTerrain();
-			player->terrain = terrain;
-			player->update();
-		}
-		regularV = VM * VOrig;
-	}
-	else if (key == GLFW_KEY_2) {
-		terrain->switchSpreading();
-	}
-
-	else if (key == GLFW_KEY_W) {
-		if (action == GLFW_RELEASE) {
-			playerBody->moving = false;
-		}
-		else {
-			player->move(0);
-		}
-	}
-	else if (key == GLFW_KEY_D) {
-		if (action == GLFW_RELEASE) {
-			playerBody->moving = false;
-		}
-		else {
-			player->move(1);
-		}
-		player->move(1);
-	}
-	else if (key == GLFW_KEY_S) {
-		if (action == GLFW_RELEASE) {
-			playerBody->moving = false;
-		}
-		else {
-			player->move(2);
-		}
-	}
-	else if (key == GLFW_KEY_A) {
-		if (action == GLFW_RELEASE) {
-			playerBody->moving = false;
-		}
-		else {
-			player->move(3);
-		}
-	}
-
-	else if (key == GLFW_KEY_X) {
-		playerView = !playerView;
-	}
-}
-
-void Window::mouse_callback(GLFWwindow* window, int button, int action, int mods)
-{
-	if (button == GLFW_MOUSE_BUTTON_LEFT) {
-		if (GLFW_PRESS == action) {
-			double x;
-			double y;
-			lbutton_down = true;
-			glfwGetCursorPos(window, &x, &y);
-			lastTrackBallPoint = trackBallMapping(window, x, y);
-		}
-		else if (GLFW_RELEASE == action) {
-			lbutton_down = false;
-		}
-	}
-}
-
-void Window::cursor_pos_callback(GLFWwindow* window, double xpos, double ypos) {
-	if (!playerView && lbutton_down) {
-		curTrackBallPoint = trackBallMapping(window, xpos, ypos);
-		float velocity = glm::sqrt(glm::dot((curTrackBallPoint - lastTrackBallPoint), (curTrackBallPoint - lastTrackBallPoint)));
-		if (velocity > 0.0001) {
-			glm::vec3 rotAxis = glm::cross(lastTrackBallPoint, curTrackBallPoint);
-			float rotAngle = glm::acos(glm::dot(lastTrackBallPoint, curTrackBallPoint) / (length(lastTrackBallPoint) * length(curTrackBallPoint)));
-			VM = glm::rotate(VM, rotAngle / 3, rotAxis);
-			regularV = VM * VOrig;
-		}
-
-		lastTrackBallPoint = curTrackBallPoint;
-	}
-	else if (playerView) {
-		curMousePos.x = xpos;
-		curMousePos.y = ypos;
-		float xdiff = curMousePos.x - lastMousePos.x;
-		float ydiff = curMousePos.y - lastMousePos.y;
-		player->cam_rotateX = glm::rotate(player->cam_rotateX, -xdiff / 200, glm::vec3(0, 1, 0));
-		player->cam_rotateY = glm::rotate(player->cam_rotateY, -ydiff / 400, glm::vec3(0, 0, 1));
-		player->update();
-		lastMousePos = curMousePos;
-	}
-}
-
-glm::vec3 Window::trackBallMapping(GLFWwindow* window, double x, double y)
-{
-	glm::vec3 v;    // Vector v is the synthesized 3D position of the mouse location on the trackball
-	float d;     // this is the depth of the mouse location: the delta between the plane through the center of the trackball and the z position of the mouse
-	int width, height;
-	glfwGetWindowSize(window, &width, &height);
-	v.x = (2.0f * x - width) / width;   // this calculates the mouse X position in trackball coordinates, which range from -1 to +1
-	v.y = (height - 2.0f * y) / height;   // this does the equivalent to the above for the mouse Y position
-	d = glm::length(v);    // this is the distance from the trackball's origin to the mouse location, without considering depth (=in the plane of the trackball's origin)
-	d = (d < 1.0f) ? d : 1.0f;   // this limits d to values of 1.0 or less to avoid square roots of negative values in the following line
-	v.z = sqrtf(1.001f - d * d);  // this calculates the Z coordinate of the mouse position on the trackball, based on Pythagoras: v.z*v.z + d*d = 1*1
-	return glm::normalize(v);  // Still need to normalize, since we only capped d, not v. Return the mouse location on the surface of the trackball
-}
-
-void Window::initializeTerrain() {
-	// totems and their constituent parts
-	Totem* totemA = new Totem(totemParts, 0);
-	Totem* totemB = new Totem(totemParts, 1);
-	Totem* totemC = new Totem(totemParts, 2);
-
-	objects.push_back(std::make_pair(totemA, 1));
-	objects.push_back(std::make_pair(totemB, 1));
-	objects.push_back(std::make_pair(totemC, 1));
-
-	LSystem* object1 = new LSystem(0, 4);
-	LSystem* object2 = new LSystem(1, 3);
-	LSystem* object3 = new LSystem(0, 5);
-	objects.push_back(std::make_pair(object1, 5));
-	objects.push_back(std::make_pair(object2, 10));
-	objects.push_back(std::make_pair(object3, 4));
-
-	terrain = new Terrain(terrainSize, terrainSize, 1, objects);
 }
