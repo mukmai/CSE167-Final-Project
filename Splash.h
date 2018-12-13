@@ -49,6 +49,8 @@ public:
 	void toggleParticles();
 	void turnParticlesOff();
 	void turnParticlesOn();
+	void shrinkSplash(float size);
+
 
 };
 

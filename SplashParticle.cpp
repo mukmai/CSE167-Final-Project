@@ -7,10 +7,11 @@ SplashParticle::SplashParticle()
 	srand(Window::seed);
 
 	// initialize state
-	this->position = glm::vec3(-9, 1, -9);
+	this->position = glm::vec3(0, 100, 0);
 	this->velocity = glm::vec3((5 - (rand() % 10))/10, +1.5, (5 - (rand() % 10)) / 10);
 	this->life = (rand() % 100) / 100.0;
 	this->delta = 0.005f;
+	this->pointSize = 5.5f;
 }
 
 SplashParticle::~SplashParticle()
@@ -21,7 +22,7 @@ void SplashParticle::draw(GLuint shaderProgram, glm::mat4 C)
 {
 	//srand(time(NULL));
 	//glPointSize(rand() % 7);
-	glPointSize(5.5);
+	glPointSize(pointSize);
 
 	// only draw if alive
 	if (this->life > 0.0f) {
@@ -35,6 +36,8 @@ void SplashParticle::draw(GLuint shaderProgram, glm::mat4 C)
 
 void SplashParticle::update()
 {
+	glPointSize(pointSize);
+
 	this->life -= this->delta;
 	// if alive, update
 	if (this->life > 0.0) {
@@ -44,9 +47,12 @@ void SplashParticle::update()
 }
 
 void SplashParticle::respawn() {
-	this->position = glm::vec3(-5, 3, -5);
+	this->position = glm::vec3(0, 100, 0);
 	this->life = 1.0f;
 	//this->velocity = glm::vec3(-5 - (rand() % 5), +1.5, -2.5 - (rand() % 5));
 	this->velocity = glm::vec3((5 - (rand() % 10))/4, (rand() % 3), (5 - (rand() % 10))/4);
 }
 
+void SplashParticle::setPointSize(float size) {
+	this->pointSize = size;
+}

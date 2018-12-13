@@ -25,6 +25,8 @@ class Node;
 class SplashParticle :
 	public Node
 {
+private:
+	float pointSize;
 public:
 	SplashParticle();
 	~SplashParticle();
@@ -32,6 +34,7 @@ public:
 	void draw(GLuint, glm::mat4);
 	void update();
 	void respawn();
+	void setPointSize(float size);
 
 	// particle states
 	glm::vec3 position, velocity;

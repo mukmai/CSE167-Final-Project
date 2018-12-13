@@ -292,6 +292,7 @@ void Window::idle_callback()
 				else {
 					particles->turnParticlesOff();
 					terrain->switchSpreading(true);
+					splash->shrinkSplash(1.5f);
 					if (treeGrowRatio < 1) {
 						treeGrowRatio += 0.004;
 						mainTreeS->set(glm::scale(glm::mat4(1.0f), glm::vec3(treeGrowRatio)));

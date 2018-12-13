@@ -90,3 +90,9 @@ void Splash::turnParticlesOn() {
 	iterations = 0;
 	particlesOn = true;
 }
+
+void Splash::shrinkSplash(float size) {
+	for (int i = 0; i < particles.size(); i++) {
+		this->particles[i]->setPointSize(size);
+	}
+}
