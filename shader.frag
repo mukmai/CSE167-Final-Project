@@ -38,6 +38,7 @@ uniform vec3 cameraPos;
 uniform DirLight dirLight;
 uniform PointLight pointLight;
 uniform sampler2D tex;
+uniform bool toon_shade;
 
 uniform samplerCube skybox;
 
@@ -58,6 +59,13 @@ void main()
 //		result += CalcPointLight(pointLight, norm, Position) * pointLight.on;
 		result += CalcDirLight(dirLight, norm) * dirLight.on;
 		color = vec4(result, 1.0f);
+		if (toon_shade) {
+			float edge = dot(normalize(cameraPos - Position), Normal);
+			edge = max(0, edge);
+			if (edge < 0.05) {
+				color = vec4(0.0f, 0.0f, 0.0f, 1.0f);
+			}
+		}
 	}
 
 }
@@ -105,6 +113,17 @@ vec3 CalcDirLight(DirLight light, vec3 normal) {
 
 	vec3 ambient = light.light_color;
 	vec3 diffuse = light.light_color * diff;
+
+	if (toon_shade) {
+	    if (diff > 0.95) { diffuse = vec4( 1.0, 1.0, 1.0, 1.0 ) * diffuse; }
+
+		else if (diff > 0.5) { diffuse = vec4( 0.6, 0.6, 0.6, 1.0 ) * diffuse; }
+
+		else if (diff > 0.25) { diffuse = vec4( 0.4, 0.4, 0.4, 1.0 ) * diffuse; }
+
+		else { diffuse = vec4( 0.2, 0.2, 0.2, 1.0 ) * diffuse; }
+	}
+
 	// render with color
 	if (drawType == 0) {
 		ambient *= material.diffuse;
@@ -126,9 +145,5 @@ vec3 CalcDirLight(DirLight light, vec3 normal) {
 			diffuse *= terrain.grass;
 		}
 	}
-	if (max(0, dot(normalize(cameraPos-Position),Normal)) < 0.05) {
-		return vec3(0,0,0);
-	}
-	
 	return (ambient + diffuse);
 }

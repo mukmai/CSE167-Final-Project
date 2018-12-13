@@ -3,7 +3,7 @@
 const char* window_title = "GLFW Starter Project";
 bool fullScreen = false;
 bool Window::playerView = true;
-
+bool Window::toon_shade = false;
 LSystem* mainTree;
 
 OBJObject* sphere;
@@ -367,7 +367,9 @@ void Window::key_callback(GLFWwindow* window, int key, int scancode, int action,
 	else if (key == GLFW_KEY_3) {
 		particles->toggleParticles();
 	}
-
+	else if (key == GLFW_KEY_4) {
+		toon_shade = !toon_shade;
+	}
 	else if (key == GLFW_KEY_W) {
 		if (action == GLFW_RELEASE) {
 			playerBody->moving = false;

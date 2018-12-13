@@ -28,6 +28,7 @@ void Geometry::draw(GLuint shaderProgram, glm::mat4 M)
 		cameraPos = glm::vec3(Player::cam_pos);
 	glUniform3fv(glGetUniformLocation(shaderProgram, "cameraPos"), 1, &cameraPos[0]);
 	glUniform3fv(glGetUniformLocation(shaderProgram, "material.diffuse"), 1, &diffuse[0]);
+	glUniform1i(glGetUniformLocation(shaderProgram, "toon_shade"), Window::toon_shade);
 	object->draw(shaderProgram, M);
 }
 
