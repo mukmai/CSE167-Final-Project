@@ -32,6 +32,8 @@
     <ClInclude Include="..\Project3-texture.h" />
     <ClInclude Include="..\shader.h" />
     <ClInclude Include="..\Terrain.h" />
+    <ClInclude Include="..\Totem.h" />
+    <ClInclude Include="..\TotemPart.h" />
     <ClInclude Include="..\Transform.h" />
     <ClInclude Include="..\Window.h" />
   </ItemGroup>
@@ -49,6 +51,8 @@
     <ClCompile Include="..\Project3-texture.cpp" />
     <ClCompile Include="..\shader.cpp" />
     <ClCompile Include="..\Terrain.cpp" />
+    <ClCompile Include="..\Totem.cpp" />
+    <ClCompile Include="..\TotemPart.cpp" />
     <ClCompile Include="..\Transform.cpp" />
     <ClCompile Include="..\Window.cpp" />
   </ItemGroup>

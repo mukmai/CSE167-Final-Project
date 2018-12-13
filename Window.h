@@ -22,6 +22,11 @@
 #include "Player.h"
 #include "PlayerBody.h"
 #include "ParticleManager.h"
+#include "Totem.h"
+#include "TotemPart.h"
+
+#include <glm/mat4x4.hpp>
+#include <glm/gtc/matrix_transform.hpp>
 
 class Window
 {
@@ -43,6 +48,16 @@ public:
 	static void cursor_pos_callback(GLFWwindow* window, double xpos, double ypos);
 	static glm::vec3 trackBallMapping(GLFWwindow* window, double x, double y);
 	static void initializeTerrain();
+private:
+	const static int BODY_NOWING_NOMOUTH = 0;
+	const static int BODY_NOWING_MOUTH = 1;
+	const static int BODY_WING_MOUTH = 2;
+	const static int BODY_NOWING_NOMOUTH_NOBOTTOM = 3;
+	const static int BODY_WING_NOMOUTH = 8;
+	const static int MOUTH = 4;
+	const static int EARS = 5;
+	const static int LEFT_WING = 6;
+	const static int RIGHT_WING = 7;
 };
 
 #endif
