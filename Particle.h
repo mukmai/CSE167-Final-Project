@@ -32,14 +32,9 @@ public:
 	void update();
 	void respawn();
 
-	// These variables are needed for the shader program
-	GLuint VBO, VAO, EBO;
-	GLuint uProjection, uModelview;
-
 	// particle states
 	glm::vec3 position, velocity;
 	GLfloat life, delta;
-	Transform* transform;
 };
 
 #endif

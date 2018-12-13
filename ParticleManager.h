@@ -29,7 +29,7 @@ class ParticleManager :
 {
 private:
 	GLuint firstUnusedParticle();
-	GLuint shaderProgram, amount;
+	GLuint amount;
 	GLuint lastUsedParticle = 0;
 
 	std::vector<Particle*> particles;
@@ -40,8 +40,6 @@ private:
 public:
 	ParticleManager(int amount);
 	~ParticleManager();
-
-	glm::mat4 toWorld;
 
 	void draw(GLuint shaderProgram, glm::mat4 C);
 	void update();

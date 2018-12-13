@@ -121,6 +121,7 @@ void Window::initialize_objects()
 
 	// actual particle generation system
 	Geometry* particleShape = new Geometry(sphere, glm::vec3(0.95f, 0.75f, 0.38f));
+
 	particles = new ParticleManager(10000);
 	//particles->transform->translate(glm::vec3(0, 10, 0));
 

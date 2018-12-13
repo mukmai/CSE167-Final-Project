@@ -8,9 +8,10 @@ Particle::Particle()
 
 	// initialize state
 	this->position = glm::vec4(-1 * (rand() % 100) - 30, -10.0f, -1 * (rand() % 100) - 30, 0.0f);
-	this->velocity = glm::vec3(-1.0f * (rand() % 10), -1.0, -1.0f * (rand() % 10));
+	//this->velocity = glm::vec3(-1.0f * (rand() % 5), -1.0, -1.0f * (rand() % 5));
+	this->velocity = glm::vec3(-1 - (rand() % 5), -0.1, -2.5 - (rand() % 5)); //glm::vec3((1.0 - (rand() % 3)) * (rand() % 10), 0.1f, (1.0 - (rand() % 3)) * (rand() % 10));
 	this->life = (rand() % 100) / 100.0;
-	this->delta = 0.05f;
+	this->delta = 0.02f;
 }
 
 Particle::~Particle()
@@ -44,6 +45,6 @@ void Particle::update()
 void Particle::respawn() {
 	this->position = glm::vec4((rand() % 200) + 100, (rand() % 100) - 10, (rand() % 200) + 100, 0.0f);
     this->life = 1.0f;
-	this->velocity = glm::vec3(-10 - (rand() % 10), -0.1, -5 - (rand() % 10)); //glm::vec3((1.0 - (rand() % 3)) * (rand() % 10), 0.1f, (1.0 - (rand() % 3)) * (rand() % 10));
+	this->velocity = glm::vec3(-5 - (rand() % 5), -0.1, -2.5 - (rand() % 5)); //glm::vec3((1.0 - (rand() % 3)) * (rand() % 10), 0.1f, (1.0 - (rand() % 3)) * (rand() % 10));
 }
 
