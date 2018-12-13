@@ -603,7 +603,6 @@ void Window::initializeTotem()
 	crown->translate(glm::vec3(0, 1.2, 0));
 	blackHat->addChild(crown);
 
-
 	// transforms
 	Transform* totemBodyT = new Transform(glm::mat4(1.0f));
 	totemBodyT->scale(glm::vec3(1, 1, 1));
