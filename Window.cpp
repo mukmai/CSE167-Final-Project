@@ -1,7 +1,7 @@
 #include "window.h"
 
 const char* window_title = "GLFW Starter Project";
-bool fullScreen = true;
+bool fullScreen = false;
 bool Window::playerView = true;
 
 LSystem* mainTree;
@@ -121,7 +121,8 @@ void Window::initialize_objects()
 
 	// actual particle generation system
 	Geometry* particleShape = new Geometry(sphere, glm::vec3(0.95f, 0.75f, 0.38f));
-	particles = new ParticleManager(10000, particleShape);
+
+	particles = new ParticleManager(10000);
 	//particles->transform->translate(glm::vec3(0, 10, 0));
 
 	world->addChild(cubemapS);
@@ -358,6 +359,13 @@ void Window::key_callback(GLFWwindow* window, int key, int scancode, int action,
 	else if (key == GLFW_KEY_2) {
 		terrain->switchSpreading();
 		spreadMode = !spreadMode;
+
+		if (spreadMode) {
+			particles->turnParticlesOff();
+		}
+	}
+	else if (key == GLFW_KEY_3) {
+		particles->toggleParticles();
 	}
 
 	else if (key == GLFW_KEY_W) {
@@ -476,21 +484,11 @@ void Window::initializeTerrain() {
 
 void Window::initializeTotem()
 {
-
 	// a collection of totem parts to be used in the totem constructor
 	// currently just uses cylindars and spheres, will produce more geometries later
 	// These do not have to actually be moved, just keeping them as identity matrices should be enough 
 	// unless there should be some squishing or flipping
 	// geometries (color coded for convenience)
-	Geometry* totemBody = new Geometry(cylinder, glm::vec3(242 / 255.0, 242 / 255.0, 242 / 255.0));
-	Geometry* eagleMouth = new Geometry(sphere, glm::vec3(242 / 255.0, 242 / 255.0, 242 / 255.0));
-	Geometry* lizardMouth = new Geometry(sphere, glm::vec3(242 / 255.0, 242 / 255.0, 242 / 255.0));
-	Geometry* whaleMouth = new Geometry(sphere, glm::vec3(242 / 255.0, 242 / 255.0, 242 / 255.0));
-	Geometry* eagleWing = new Geometry(sphere, glm::vec3(242 / 255.0, 242 / 255.0, 242 / 255.0));
-	Geometry* albatrossWing = new Geometry(sphere, glm::vec3(38 / 255.0, 38 / 255.0, 38 / 255.0));
-	Geometry* catEars = new Geometry(sphere, glm::vec3(242 / 255.0, 242 / 255.0, 242 / 255.0));
-	Geometry* hatEars = new Geometry(sphere, glm::vec3(242 / 255.0, 242 / 255.0, 242 / 255.0));
-
 	Geometry* blackSphere = new Geometry(sphere, glm::vec3(38 / 255.0, 38 / 255.0, 38 / 255.0));
 	Geometry* whiteSphere = new Geometry(sphere, glm::vec3(242 / 255.0, 242 / 255.0, 242 / 255.0));
 	Geometry* redSphere = new Geometry(sphere, glm::vec3(255 / 255.0, 51 / 255.0, 0 / 255.0));
@@ -502,50 +500,31 @@ void Window::initializeTotem()
 	// generic eye
 	Transform* eye = new Transform(glm::mat4(1.0f));
 	Transform* eyeOutline = new Transform(glm::mat4(1.0f));
-	Transform* eyeWhites = new Transform(glm::mat4(1.0f));
 	Transform* eyeIris = new Transform(glm::mat4(1.0f));
 	Transform* eyePupil = new Transform(glm::mat4(1.0f));
-	eyeOutline->addChild(blackSphere);
+	eyeOutline->addChild(redSphere);
 	eyeOutline->scale(glm::vec3(1, 1, .7));
-	eyeWhites->addChild(redSphere);
-	eyeWhites->scale(glm::vec3(.8, .8, .3));
-	eyeWhites->translate(glm::vec3(0, 0, 2));
-	eyeIris->addChild(redSphere);
+	eyeIris->addChild(whiteSphere);
 	eyeIris->scale(glm::vec3(.5, .5, .3));
 	eyeIris->translate(glm::vec3(0, 0, 2.5));
 	eyePupil->addChild(blackSphere);
 	eyePupil->scale(glm::vec3(.3, .3, .4));
 	eyePupil->translate(glm::vec3(0, 0, 2.2));
 	eye->addChild(eyeOutline);
-	eye->addChild(eyeWhites);
 	eye->addChild(eyeIris);
 	eye->addChild(eyePupil);
 
 	// building complex transforms from geometry
 	// lizard mouth
 	Transform* lizardMouthTop = new Transform(glm::mat4(1.0f));
-	lizardMouthTop->addChild(lizardMouth);
-	lizardMouthTop->scale(glm::vec3(.8, .5, 1.5));
-	lizardMouthTop->translate(glm::vec3(0, 0.3, .3));
+	lizardMouthTop->addChild(whiteSphere);
+	lizardMouthTop->scale(glm::vec3(.8, .3, 1.5));
+	lizardMouthTop->translate(glm::vec3(0, 1, .3));
 	Transform* lizardMouthBottom = new Transform(glm::mat4(1.0f));
-	lizardMouthBottom->addChild(lizardMouth);
+	lizardMouthBottom->addChild(whiteSphere);
 	lizardMouthBottom->scale(glm::vec3(.8, .2, 1.3));
-	lizardMouthBottom->translate(glm::vec3(0, -0.5, .3));
-	lizardMouthBottom->rotate(30);
-	Transform* lizardTongue = new Transform(glm::mat4(1.0f));
-	lizardTongue->addChild(redSphere);
-	lizardTongue->scale(glm::vec3(.3, .1, 1.75));
-	lizardTongue->rotate(30);
-	lizardTongue->translate(glm::vec3(0, -0.2, .5));
-	/*
-	Transform* lizardLeftEye = new Transform(glm::mat4(1.0f));
-	lizardLeftEye->addChild(eye);
-	lizardLeft(eye)
-	lizardMouthTop->addChild(lizardLeftEye);
-	Transform* lizardRightEye = new Transform(glm::mat4(1.0f));
-	*/
-
-
+	lizardMouthBottom->translate(glm::vec3(0, -0.8, .3));
+	//lizardMouthBottom->rotate(15);
 
 	// pair of arms (???)
 	Transform* arms = new Transform(glm::mat4(1.0f));
@@ -628,7 +607,7 @@ void Window::initializeTotem()
 	// transforms
 	Transform* totemBodyT = new Transform(glm::mat4(1.0f));
 	totemBodyT->scale(glm::vec3(1, 1, 1));
-	totemBodyT->addChild(totemBody);
+	totemBodyT->addChild(whiteCylinder);
 	Transform* eagleMouthT = new Transform(glm::mat4(1.0f));
 	Transform* mainEye = new Transform(glm::mat4(1.0));
 	mainEye->addChild(eye);
@@ -649,24 +628,22 @@ void Window::initializeTotem()
 	eagleMouthT->addChild(rightEye);
 
 	Transform* lizardMouthT = new Transform(glm::mat4(1.0f));
-	eagleMouthT->addChild(eagleMouth);
 	lizardMouthT->addChild(lizardMouthTop);
 	lizardMouthT->addChild(lizardMouthBottom);
-	lizardMouthT->addChild(lizardTongue);
 
 	Transform* whaleMouthT = new Transform(glm::mat4(1.0f));
 	whaleMouthT->addChild(arms);
 	Transform* eagleWingLT = new Transform(glm::mat4(1.0f));
-	eagleWingLT->addChild(eagleWing);
+	eagleWingLT->addChild(whiteSphere);
 	eagleWingLT->scale(glm::vec3(3, .5, .01));
 	Transform* eagleWingRT = new Transform(glm::mat4(1.0f));
-	eagleWingRT->addChild(eagleWing);
+	eagleWingRT->addChild(whiteSphere);
 	eagleWingRT->scale(glm::vec3(3, .5, .01));
 	Transform* albatrossWingLT = new Transform(glm::mat4(1.0f));
-	albatrossWingLT->addChild(albatrossWing);
+	albatrossWingLT->addChild(blackSphere);
 	albatrossWingLT->scale(glm::vec3(3, .5, .01));
 	Transform* albatrossWingRT = new Transform(glm::mat4(1.0f));
-	albatrossWingRT->addChild(albatrossWing);
+	albatrossWingRT->addChild(blackSphere);
 	albatrossWingRT->scale(glm::vec3(3, .5, .01));
 	Transform* catEarsT = new Transform(glm::mat4(1.0f));
 	catEarsT->addChild(horns);
@@ -689,4 +666,8 @@ void Window::initializeTotem()
 	totemParts.push_back(new TotemPart(RIGHT_WING, albatrossWingRT));
 	totemParts.push_back(new TotemPart(EARS, catEarsT));
 	totemParts.push_back(new TotemPart(EARS, hatEarsT));
+
+
+
+
 }

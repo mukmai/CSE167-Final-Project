@@ -29,19 +29,23 @@ class ParticleManager :
 {
 private:
 	GLuint firstUnusedParticle();
-	GLuint shaderProgram, amount;
+	GLuint amount;
 	GLuint lastUsedParticle = 0;
 
 	std::vector<Particle*> particles;
 
-public:
-	ParticleManager(int amount, Geometry* particleShape);
-	~ParticleManager();
+	int respawnRate;
+	bool particlesOn;
 
-	glm::mat4 toWorld;
+public:
+	ParticleManager(int amount);
+	~ParticleManager();
 
 	void draw(GLuint shaderProgram, glm::mat4 C);
 	void update();
+	void toggleParticles();
+	void turnParticlesOff();
+	void turnParticlesOn();
 
 };
 

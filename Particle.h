@@ -25,21 +25,16 @@ class Particle :
 	public Node
 {
 public:
-	Particle(glm::vec3 pos, Geometry* particleShape);
+	Particle();
 	~Particle();
 
 	void draw(GLuint, glm::mat4);
 	void update();
 	void respawn();
 
-	// These variables are needed for the shader program
-	GLuint VBO, VAO, EBO;
-	GLuint uProjection, uModelview;
-
 	// particle states
 	glm::vec3 position, velocity;
 	GLfloat life, delta;
-	Transform* transform;
 };
 
 #endif
