@@ -1,9 +1,10 @@
 #include "Totem.h"
+#include "Window.h"
 
 #include <time.h>
 
 Totem::Totem(std::vector<TotemPart*> totemParts, int counterVal) {
-	srand(time(NULL) + counterVal);
+	srand(Window::seed + counterVal);
 
 	// categorize all parts before using them
 	createCategories(totemParts);
@@ -51,7 +52,7 @@ Totem::~Totem()
 }
 
 void Totem::generateTotem(int counterVal) {
-	srand(time(NULL) + counterVal);
+	srand(Window::seed + counterVal);
 
 	// for containing reference to the bottommost piece, set it as the first (and only) child of the Totem
 	TotemPart* basePiece = new TotemPart(BODY_NOWING_NOMOUTH_NOBOTTOM, this->bodies[0]);

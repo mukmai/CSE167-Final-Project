@@ -19,6 +19,8 @@
     <ClCompile Include="..\TotemPart.cpp" />
     <ClCompile Include="..\Transform.cpp" />
     <ClCompile Include="..\Window.cpp" />
+    <ClCompile Include="..\Splash.cpp" />
+    <ClCompile Include="..\SplashParticle.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\CubeMap.h" />
@@ -39,6 +41,8 @@
     <ClInclude Include="..\TotemPart.h" />
     <ClInclude Include="..\Transform.h" />
     <ClInclude Include="..\Window.h" />
+    <ClInclude Include="..\Splash.h" />
+    <ClInclude Include="..\SplashParticle.h" />
   </ItemGroup>
   <ItemGroup>
     <None Include="..\shader.frag" />

@@ -22,6 +22,7 @@
 #include "Player.h"
 #include "PlayerBody.h"
 #include "ParticleManager.h"
+#include "Splash.h"
 #include "Totem.h"
 #include "TotemPart.h"
 
