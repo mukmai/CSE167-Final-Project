@@ -1,6 +1,4 @@
 #include "ParticleManager.h"
-#include "Window.h"
-#include <iostream>
 
 ParticleManager::ParticleManager(int amount) {
 	this->amount = amount;

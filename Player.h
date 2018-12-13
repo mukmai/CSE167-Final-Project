@@ -17,8 +17,6 @@ private:
 	Transform* rotation;
 	PlayerBody* playerBody;
 	glm::vec2 terrainCoord;
-	glm::vec3 position;
-
 	float speed;
 public:
 	Player(PlayerBody* playerBody, Terrain* terrain);
@@ -33,6 +31,7 @@ public:
 	static glm::vec3 cam_pos;		// e  | Position of camera
 	glm::vec3 cam_look_at;	// d  | This is where the camera looks at
 	glm::vec3 cam_up;			// up | What orientation "up" is
+	glm::vec3 position;
 };
 
 #endif

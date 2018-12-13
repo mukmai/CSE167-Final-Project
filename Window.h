@@ -40,6 +40,7 @@ public:
 	static bool playerView;
 	static bool toon_shade;
 	static unsigned int seed;
+	static bool endGame, endFinished;
 	static void initialize_objects();
 	static void clean_up();
 	static GLFWwindow* create_window(int width, int height);

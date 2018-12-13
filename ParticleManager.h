@@ -20,6 +20,8 @@
 #include "Node.h"
 #include "Geometry.h"
 #include "Particle.h"
+#include "Window.h"
+#include <iostream>
 
 // Forward declarations needed
 class Particle;

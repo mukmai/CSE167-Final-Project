@@ -58,6 +58,7 @@ LSystem::LSystem(int type, int depth)
 
 	width *= 0.2 * depth;
 
+	srand(2);
 	for (int i = 0; i <= depth; i++) {
 		expand();
 	}

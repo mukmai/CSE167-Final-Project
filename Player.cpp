@@ -31,12 +31,16 @@ void Player::draw(GLuint shaderProgram, glm::mat4 C) {
 }
 
 void Player::update() {
-	
 	position = terrain->getPosition(terrainCoord);
+	float dist = sqrt(pow(position.x - terrain->center.x, 2) + pow(position.z - terrain->center.z, 2));
+	if (dist < 4) {
+		Window::endGame = true;
+	}
 	posOffset->set(glm::translate(glm::mat4(1.0f), position));
 	
 	cam_pos =  position + glm::vec3(cam_rotateX * cam_rotateY * glm::vec4(cam_backOff,1));
-	cam_look_at = position + glm::vec3(0,3,0);
+	if (!Window::endGame || Window::endFinished)
+		cam_look_at = position + glm::vec3(0,3,0);
 	thirdPersonV = glm::lookAt(cam_pos, cam_look_at, cam_up);
 }
 
