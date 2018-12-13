@@ -469,7 +469,7 @@ void Window::key_callback(GLFWwindow* window, int key, int scancode, int action,
 		}
 	}
 
-	else if (key == GLFW_KEY_X) {
+	if (key == GLFW_KEY_X) {
 		playerView = !playerView;
 	}
 }
