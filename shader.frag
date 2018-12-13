@@ -126,6 +126,9 @@ vec3 CalcDirLight(DirLight light, vec3 normal) {
 			diffuse *= terrain.grass;
 		}
 	}
+	if (max(0, dot(normalize(cameraPos-Position),Normal)) < 0.05) {
+		return vec3(0,0,0);
+	}
 	
 	return (ambient + diffuse);
 }

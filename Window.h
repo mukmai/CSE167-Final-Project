@@ -36,6 +36,7 @@ public:
 	static int height;
 	static glm::mat4 P; // P for projection
 	static glm::mat4 V; // V for view
+	static bool playerView;
 	static unsigned int seed;
 	static void initialize_objects();
 	static void clean_up();
