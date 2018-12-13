@@ -1,5 +1,5 @@
-#ifndef _PARTICLE_H_
-#define _PARTICLE_H_
+#ifndef _SPLASHPARTICLE_H_
+#define _SPLASHPARTICLE_H_
 
 #define GLFW_INCLUDE_GLEXT
 #ifdef __APPLE__
@@ -20,13 +20,14 @@
 
 // Forward declarations needed
 class Geometry;
+class Node;
 
-class Particle :
+class SplashParticle :
 	public Node
 {
 public:
-	Particle();
-	~Particle();
+	SplashParticle();
+	~SplashParticle();
 
 	void draw(GLuint, glm::mat4);
 	void update();
@@ -35,10 +36,6 @@ public:
 	// particle states
 	glm::vec3 position, velocity;
 	GLfloat life, delta;
-
-	// shading
-	GLuint VBO, VAO, EBO, VBO2, VBO3;
-	glm::mat4* I;
 
 };
 

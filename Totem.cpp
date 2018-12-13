@@ -1,9 +1,10 @@
 #include "Totem.h"
+#include "Window.h"
 
 #include <time.h>
 
 Totem::Totem(std::vector<TotemPart*> totemParts, int counterVal) {
-	srand(time(NULL) + counterVal);
+	srand(Window::seed + counterVal);
 
 	// categorize all parts before using them
 	createCategories(totemParts);

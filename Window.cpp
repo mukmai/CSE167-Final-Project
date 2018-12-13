@@ -30,6 +30,7 @@ int terrainSize = 256;
 unsigned int Window::seed = 4;
 
 ParticleManager* particles;
+Splash* splash;
 
 std::vector<std::pair<Node*, int>> objects;
 
@@ -123,6 +124,7 @@ void Window::initialize_objects()
 	Geometry* particleShape = new Geometry(sphere, glm::vec3(0.95f, 0.75f, 0.38f));
 
 	particles = new ParticleManager(10000);
+	splash = new Splash(10000);
 	//particles->transform->translate(glm::vec3(0, 10, 0));
 
 	world->addChild(cubemapS);
@@ -147,6 +149,7 @@ void Window::initialize_objects()
 	stageS->addChild(stage);
 
 	world->addChild(particles);
+	world->addChild(splash);
 
 	// Load the shader program. Make sure you have the correct filepath up top
 	shaderProgram = LoadShaders(VERTEX_SHADER_PATH, FRAGMENT_SHADER_PATH);
@@ -242,7 +245,8 @@ void Window::resize_callback(GLFWwindow* window, int width, int height)
 
 void Window::idle_callback()
 {
-	particles->update();
+	//particles->update();
+	splash->update();
 	playerBody->update();
 	if (spreadMode && growRatio < 1) {
 		growRatio += 0.01;
@@ -275,6 +279,7 @@ void Window::display_callback(GLFWwindow* window)
 	player->draw(shaderProgram, glm::mat4(1.0f));
 
 	particles->draw(shaderProgram, glm::mat4(1.0f));
+	splash->draw(shaderProgram, glm::mat4(1.0f));
 
 	// Gets events, including input such as keyboard and mouse or window resizing
 	glfwPollEvents();

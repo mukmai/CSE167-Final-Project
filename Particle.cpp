@@ -4,7 +4,7 @@
 
 Particle::Particle()
 {
-	srand(time(NULL));
+	srand(Window::seed);
 
 	// initialize state
 	this->position = glm::vec4(-1 * (rand() % 100) - 30, -10.0f, -1 * (rand() % 100) - 30, 0.0f);

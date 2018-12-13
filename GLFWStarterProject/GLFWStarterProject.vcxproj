@@ -32,6 +32,8 @@
     <ClInclude Include="..\PlayerBody.h" />
     <ClInclude Include="..\Project3-texture.h" />
     <ClInclude Include="..\shader.h" />
+    <ClInclude Include="..\Splash.h" />
+    <ClInclude Include="..\SplashParticle.h" />
     <ClInclude Include="..\Terrain.h" />
     <ClInclude Include="..\Totem.h" />
     <ClInclude Include="..\TotemPart.h" />
@@ -52,6 +54,8 @@
     <ClCompile Include="..\PlayerBody.cpp" />
     <ClCompile Include="..\Project3-texture.cpp" />
     <ClCompile Include="..\shader.cpp" />
+    <ClCompile Include="..\Splash.cpp" />
+    <ClCompile Include="..\SplashParticle.cpp" />
     <ClCompile Include="..\Terrain.cpp" />
     <ClCompile Include="..\Totem.cpp" />
     <ClCompile Include="..\TotemPart.cpp" />
@@ -66,7 +70,7 @@
   <PropertyGroup Label="Globals">
     <ProjectGuid>{EBF1E546-3F93-49DB-BD9A-B629C3C6DCB0}</ProjectGuid>
     <RootNamespace>GLFWStarterProject</RootNamespace>
-    <WindowsTargetPlatformVersion>10.0.17763.0</WindowsTargetPlatformVersion>
+    <WindowsTargetPlatformVersion>10.0.17134.0</WindowsTargetPlatformVersion>
   </PropertyGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.Default.props" />
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'" Label="Configuration">
