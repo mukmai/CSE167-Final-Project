@@ -115,13 +115,10 @@ vec3 CalcDirLight(DirLight light, vec3 normal) {
 	vec3 diffuse = light.light_color * diff;
 
 	if (toon_shade) {
-	    if (diff > 0.95) { diffuse = vec4( 1.0, 1.0, 1.0, 1.0 ) * diffuse; }
-
-		else if (diff > 0.5) { diffuse = vec4( 0.6, 0.6, 0.6, 1.0 ) * diffuse; }
-
-		else if (diff > 0.25) { diffuse = vec4( 0.4, 0.4, 0.4, 1.0 ) * diffuse; }
-
-		else { diffuse = vec4( 0.2, 0.2, 0.2, 1.0 ) * diffuse; }
+	    if (diff > 0.95) diffuse = vec3(vec3(1.0) * diffuse);
+		else if (diff > 0.5) diffuse = vec3(vec3(0.6) * diffuse);
+		else if (diff > 0.25) diffuse = vec3(vec3(0.4) * diffuse);
+		else diffuse = vec3(vec3(0.2) * diffuse);
 	}
 
 	// render with color
