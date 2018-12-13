@@ -2,8 +2,7 @@
 
 LSystem::LSystem(int type, int depth)
 {
-	// srand(time(NULL));
-	// type = rand() % 3;
+	leafSwitch = false;
 	this->type = type;
 	this->depth = depth;
 	axiom = "X";
@@ -161,17 +160,20 @@ void LSystem::draw(GLuint shaderProgram, glm::mat4 C) {
 	// Unbind the VAO when we're done so we don't accidentally draw extra stuff or tamper with its bound buffers
 	glBindVertexArray(0);
 
-	glUniformMatrix4fv(glGetUniformLocation(shaderProgram, "projection"), 1, GL_FALSE, &Window::P[0][0]);
-	glUniformMatrix4fv(glGetUniformLocation(shaderProgram, "view"), 1, GL_FALSE, &Window::V[0][0]);
-	glUniformMatrix4fv(glGetUniformLocation(shaderProgram, "model"), 1, GL_FALSE, &C[0][0]);
-	glUniform1i(glGetUniformLocation(shaderProgram, "drawType"), 0);
-	glUniform3fv(glGetUniformLocation(shaderProgram, "cameraPos"), 1, &cameraPos[0]);
-	glUniform3fv(glGetUniformLocation(shaderProgram, "material.diffuse"), 1, &leafDiffuse[0]);
+	if (leafSwitch) {
+		glUniformMatrix4fv(glGetUniformLocation(shaderProgram, "projection"), 1, GL_FALSE, &Window::P[0][0]);
+		glUniformMatrix4fv(glGetUniformLocation(shaderProgram, "view"), 1, GL_FALSE, &Window::V[0][0]);
+		glUniformMatrix4fv(glGetUniformLocation(shaderProgram, "model"), 1, GL_FALSE, &C[0][0]);
+		glUniform1i(glGetUniformLocation(shaderProgram, "drawType"), 0);
+		glUniform3fv(glGetUniformLocation(shaderProgram, "cameraPos"), 1, &cameraPos[0]);
+		glUniform3fv(glGetUniformLocation(shaderProgram, "material.diffuse"), 1, &leafDiffuse[0]);
 
-	glBindVertexArray(LVAO);
-	glDrawArrays(GL_TRIANGLES, 0, (int)lvertices_.size());
-	// Unbind the VAO when we're done so we don't accidentally draw extra stuff or tamper with its bound buffers
-	glBindVertexArray(0);
+		glBindVertexArray(LVAO);
+		glDrawArrays(GL_TRIANGLES, 0, (int)lvertices_.size());
+		// Unbind the VAO when we're done so we don't accidentally draw extra stuff or tamper with its bound buffers
+		glBindVertexArray(0);
+	}
+
 }
 
 void LSystem::update() {

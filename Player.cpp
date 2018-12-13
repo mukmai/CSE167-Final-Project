@@ -22,6 +22,7 @@ Player::Player(PlayerBody* playerBody, Terrain* terrain)
 
 Player::~Player()
 {
+	delete(playerBody);
 }
 
 void Player::draw(GLuint shaderProgram, glm::mat4 C) {

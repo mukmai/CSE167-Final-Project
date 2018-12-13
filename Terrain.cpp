@@ -1,7 +1,5 @@
 #include "Terrain.h"
 
-
-
 Terrain::Terrain(int row, int col, float distance, std::vector<std::pair<Node*,int>> objects)
 {
 	this->distance = distance;
@@ -73,8 +71,13 @@ void Terrain::draw(GLuint shaderProgram, glm::mat4 C) {
 	glDrawArrays(GL_TRIANGLE_STRIP, 0, (int)vertices_.size());
 	// Unbind the VAO when we're done so we don't accidentally draw extra stuff or tamper with its bound buffers
 	glBindVertexArray(0);
+
+	int i = 0;
 	for (auto it = childrenList.begin(); it != childrenList.end(); ++it) {
+		float dist = sqrt(pow(childrenLocations[i].x - center.x, 2) + pow(childrenLocations[i].z - center.z, 2));
+		LSystem::leafSwitch = dist < grassRadius;
 		(*it)->draw(shaderProgram, C);
+		i++;
 	}
 }
 
@@ -243,6 +246,7 @@ void Terrain::generateObjectPosition(Node* object, int amount) {
 			Transform* offset = new Transform(glm::translate(glm::mat4(1.0f), terrainVertices[i][j]));
 			offset->addChild(object);
 			childrenList.push_back(offset);
+			childrenLocations.push_back(terrainVertices[i][j]);
 			count++;
 		}
 	}

@@ -34,7 +34,7 @@ void Transform::removeChild(Node * child)
 }
 
 void Transform::rotate(float degree) {
-	M = glm::rotate(glm::mat4(1.0f), glm::radians(degree), glm::vec3(1.0f, 0.0f, 0.0f)) * M;
+	M = glm::rotate(glm::mat4(1.0f), glm::radians(degree), glm::vec3(0.0f, 0.0f, 1.0f)) * M;
 }
 
 void Transform::rotate(glm::mat4 R) {

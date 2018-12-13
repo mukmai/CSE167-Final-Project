@@ -1,14 +1,14 @@
 #include "window.h"
 
 const char* window_title = "GLFW Starter Project";
-bool fullScreen = true;
+bool fullScreen = false;
 bool playerView = true;
 
 LSystem* mainTree;
 
 OBJObject* sphere;
 OBJObject* cylinder;
-OBJObject* skull;
+OBJObject* limb;
 
 CubeMap* cubemap;
 Transform* world;
@@ -65,6 +65,8 @@ glm::mat4 regularV;
 glm::vec2 lastMousePos;
 glm::vec2 curMousePos;
 
+bool LSystem::leafSwitch;
+
 void Window::initialize_objects()
 {
 	/*
@@ -85,16 +87,14 @@ void Window::initialize_objects()
 
 	sphere = new OBJObject("sphere.obj", true);
 	cylinder = new OBJObject("body_s.obj", false);
-	//OBJObject* canine = new OBJObject("fish.obj", true);
-	OBJObject* skull = new OBJObject("skull2.obj", false);
-	OBJObject* sandParticle = new OBJObject("particle.obj", true);
+	limb = new OBJObject("limb_s.obj", false);
 
 	orb = new Geometry(sphere, glm::vec3(0, 0.80, 0.91));
 	stage = new Geometry(cylinder, glm::vec3(0.5, 0.5, 0.5));
 
 	world = new Transform(glm::mat4(1.0f));
 	cubemapS = new Transform(glm::scale(glm::mat4(1.0f), glm::vec3(500.0f)));
-	stageOffset = new Transform(glm::translate(glm::mat4(1.0f), glm::vec3(0,-0.5,0)));
+	stageOffset = new Transform(glm::translate(glm::mat4(1.0f), glm::vec3(0,-0.7,0)));
 	stageS = new Transform(glm::scale(glm::mat4(1.0f), glm::vec3(5,1,5)));
 	orbOffset = new Transform(glm::translate(glm::mat4(1.0f), glm::vec3(0, 5, 0)));
 	
@@ -270,9 +270,10 @@ void Window::initialize_objects()
 
 	sunLight = new LightSource(glm::vec3(0.5, 0.47, 0.35), glm::vec3(0, -1, 2));
 
-	Geometry* bodyPart = new Geometry(cylinder, glm::vec3(0.95, 0.63, 0.84));
-	Geometry* headPart = new Geometry(sphere, glm::vec3(0.2, 0.2, 0.2));
-	playerBody = new PlayerBody(headPart, bodyPart);
+	Geometry* bodyPart = new Geometry(cylinder, glm::vec3(0.54, 0.42, 0.12));
+	Geometry* headPart = new Geometry(sphere, glm::vec3(0.99, 0.89, 0.72));
+	Geometry* limbPart = new Geometry(limb, glm::vec3(0.54, 0.42, 0.12));
+	playerBody = new PlayerBody(headPart, bodyPart, limbPart);
 	player = new Player(playerBody, terrain);
 
 	// actual particle generation system
@@ -310,6 +311,9 @@ void Window::clean_up()
 {
 	glDeleteProgram(shaderProgram);
 	delete(world);
+	delete(sunLight);
+	delete(player);
+	delete(terrain);
 }
 
 GLFWwindow* Window::create_window(int width, int height)
@@ -347,9 +351,6 @@ GLFWwindow* Window::create_window(int width, int height)
 	else {
 		window = glfwCreateWindow(width, height, window_title, NULL, NULL);
 	}
-
-
-
 
 	// Check if the window could not be created
 	if (!window)
@@ -395,6 +396,7 @@ void Window::resize_callback(GLFWwindow* window, int width, int height)
 void Window::idle_callback()
 {
 	particles->update();
+	playerBody->update();
 }
 
 void Window::display_callback(GLFWwindow* window)
@@ -412,7 +414,9 @@ void Window::display_callback(GLFWwindow* window)
 	glUseProgram(shaderProgram);
 	sunLight->draw(shaderProgram, glm::mat4(1.0f));
 	terrain->draw(shaderProgram, glm::mat4(1.0f));
+	LSystem::leafSwitch = true;
 	world->draw(shaderProgram, glm::mat4(1.0f));
+	LSystem::leafSwitch = false;
 	player->draw(shaderProgram, glm::mat4(1.0f));
 
 	particles->draw(shaderProgram, glm::mat4(1.0f));
@@ -502,16 +506,37 @@ void Window::key_callback(GLFWwindow* window, int key, int scancode, int action,
 	}
 
 	else if (key == GLFW_KEY_W) {
-		player->move(0);
+		if (action == GLFW_RELEASE) {
+			playerBody->moving = false;
+		}
+		else {
+			player->move(0);
+		}
 	}
 	else if (key == GLFW_KEY_D) {
+		if (action == GLFW_RELEASE) {
+			playerBody->moving = false;
+		}
+		else {
+			player->move(1);
+		}
 		player->move(1);
 	}
 	else if (key == GLFW_KEY_S) {
-		player->move(2);
+		if (action == GLFW_RELEASE) {
+			playerBody->moving = false;
+		}
+		else {
+			player->move(2);
+		}
 	}
 	else if (key == GLFW_KEY_A) {
-		player->move(3);
+		if (action == GLFW_RELEASE) {
+			playerBody->moving = false;
+		}
+		else {
+			player->move(3);
+		}
 	}
 
 	else if (key == GLFW_KEY_X) {
@@ -591,9 +616,9 @@ void Window::initializeTerrain() {
 	LSystem* object1 = new LSystem(0, 4);
 	LSystem* object2 = new LSystem(1, 3);
 	LSystem* object3 = new LSystem(0, 5);
-	objects.push_back(std::make_pair(object1, 7));
+	objects.push_back(std::make_pair(object1, 5));
 	objects.push_back(std::make_pair(object2, 10));
-	objects.push_back(std::make_pair(object3, 5));
+	objects.push_back(std::make_pair(object3, 4));
 
 	terrain = new Terrain(terrainSize, terrainSize, 1, objects);
 }

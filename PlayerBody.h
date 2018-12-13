@@ -14,14 +14,20 @@ private:
 	Transform* mainBodyR;
 	Transform* leftLegR;
 	Transform* rightLegR;
+	Transform* leftArmRout;
+	Transform* rightArmRout;
+	int loopTime;
+	int timer;
+	int dir;
 
 public:
-	PlayerBody(Geometry* head, Geometry* body);
+	PlayerBody(Geometry* head, Geometry* body, Geometry* limb);
 	~PlayerBody();
 	void draw(GLuint shaderProgram, glm::mat4 C);
 	void update();
 	void move(float desireAngle);
 	float curAngle;
+	bool moving;
 };
 
 #endif

@@ -2,6 +2,7 @@
 #define TERRAIN
 #include "Node.h"
 #include "Window.h"
+#include "LSystem.h"
 #include <stdlib.h>
 #include <vector>
 #include <list>
@@ -24,6 +25,7 @@ private:
 	std::vector<std::pair<Node*, int>> objects;
 	glm::vec3 desertColor, grassColor;
 	bool spread;
+	std::vector<glm::vec3> childrenLocations;
 
 public:
 	Terrain(int row, int col, float distance, std::vector<std::pair<Node*, int>> objects);

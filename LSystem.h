@@ -32,6 +32,7 @@ public:
 	void expand(); // apply production rule
 	void createCylinder(float height, int nEdges, float botWidth, float topWidth, glm::mat4 M);
 	GLuint VBO, VBO2, VAO, LVBO, LVBO2, LVAO;
+	static bool leafSwitch;
 };
 
 #endif
