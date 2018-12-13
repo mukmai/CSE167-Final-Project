@@ -122,7 +122,9 @@ void Window::initialize_objects()
 
 	sunLight = new LightSource(glm::vec3(0.5, 0.47, 0.35), glm::vec3(0, -1, 2));
 
+	Geometry* bodyPart = new Geometry(cylinder, glm::vec3(0.07, 0.16, 0.35));
 	Geometry* headPart = new Geometry(sphere, glm::vec3(0.99, 0.89, 0.72));
+	Geometry* limbPart = new Geometry(limb, glm::vec3(0.07, 0.16, 0.35));
 	playerBody = new PlayerBody(headPart, bodyPart, limbPart);
 	player = new Player(playerBody, terrain);
 
