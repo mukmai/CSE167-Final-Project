@@ -262,16 +262,6 @@ void Window::initialize_objects()
 	totemParts.push_back(new TotemPart(EARS, catEarsT));
 	totemParts.push_back(new TotemPart(EARS, hatEarsT));
 
-	// DEBUG STUFF
-	/*
-	Geometry* skullG = new Geometry(skull, glm::vec3(0, 0.80, 0.91));
-	Transform* skullT = new Transform(glm::mat4(1.0f));
-	skullT->addChild(skullG);
-	skullT->scale(glm::vec3(10.01, 10.01, 10.01));
-	skullT->translate(glm::vec3(30, 0, 30));
-	world->addChild(skullT);
-	*/
-
 	cubemap = new CubeMap(textureFiles);
 
 	initializeTerrain();
