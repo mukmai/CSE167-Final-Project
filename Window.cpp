@@ -134,6 +134,7 @@ void Window::initialize_objects()
 
 	particles = new ParticleManager(10000);
 	splash = new Splash(10000);
+	splash->turnParticlesOff();
 	//particles->transform->translate(glm::vec3(0, 10, 0));
 
 	world->addChild(cubemapS);
@@ -255,7 +256,7 @@ void Window::resize_callback(GLFWwindow* window, int width, int height)
 
 void Window::idle_callback()
 {
-	//particles->update();
+	particles->update();
 	splash->update();
 	playerBody->update();
 	if (spreadMode && treeGrowRatio < 1) {
@@ -284,6 +285,7 @@ void Window::idle_callback()
 			else {
 				if (standTime > 0) {
 					// drop particle here
+					splash->turnParticlesOn();
 					playerBody->moving = false;
 					standTime--;
 				}
