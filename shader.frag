@@ -47,6 +47,7 @@ out vec4 color;
 
 vec3 CalcPointLight(PointLight light, vec3 normal, vec3 fragPos);
 vec3 CalcDirLight(DirLight light, vec3 normal);
+vec3 lerp(vec3 a, vec3 b, float t);
 
 void main()
 {
@@ -68,6 +69,11 @@ void main()
 		}
 	}
 
+}
+
+vec3 lerp(vec3 a, vec3 b, float t) {
+	if (t > 1) return b;
+	return (a + (b - a) * t);
 }
 
 vec3 CalcPointLight(PointLight light, vec3 normal, vec3 fragPos) {
@@ -99,8 +105,8 @@ vec3 CalcPointLight(PointLight light, vec3 normal, vec3 fragPos) {
 			ambient *= terrain.desert;
 			diffuse *= terrain.desert;
 		} else {
-			ambient *= terrain.grass;
-			diffuse *= terrain.grass;
+			ambient *= lerp(terrain.desert, terrain.grass, (terrain.radius - dist) / 100);
+			diffuse *= lerp(terrain.desert, terrain.grass, (terrain.radius - dist) / 100);
 		}
 	}
 	

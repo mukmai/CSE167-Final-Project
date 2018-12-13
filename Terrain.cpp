@@ -65,7 +65,7 @@ void Terrain::draw(GLuint shaderProgram, glm::mat4 C) {
 	glUniform3fv(glGetUniformLocation(shaderProgram, "cameraPos"), 1, &cameraPos[0]);
 	glUniform3fv(glGetUniformLocation(shaderProgram, "terrain.desert"), 1, &desertColor[0]);
 	glUniform3fv(glGetUniformLocation(shaderProgram, "terrain.grass"), 1, &grassColor[0]);
-	glm::vec3 center = glm::vec4(terrainVertices[row / 2][col / 2], 1);
+	center = glm::vec3(terrainVertices[row / 2][col / 2]);
 	glUniform3fv(glGetUniformLocation(shaderProgram, "terrain.center"), 1, &center[0]);
 	glUniform1i(glGetUniformLocation(shaderProgram, "terrain.radius"), grassRadius);
 
@@ -254,8 +254,8 @@ void Terrain::generateObjectPosition(Node* object, int amount) {
 	}
 }
 
-void Terrain::switchSpreading() {
-	spread = !spread;
+void Terrain::switchSpreading(bool choice) {
+	spread = choice;
 }
 
 glm::vec3 Terrain::getPosition(glm::vec2 coord) {

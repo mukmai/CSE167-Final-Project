@@ -14,7 +14,6 @@ private:
 	std::vector<std::vector<glm::vec3>> terrainVertices;
 	std::vector<std::vector<glm::vec3>> terrainNormals;
 	float distance;
-	int grassRadius;
 	std::vector<glm::vec3> vertices_;
 	std::vector<glm::vec3> normals_;
 	std::vector<std::vector<float>> perlinNoiseSeed;
@@ -39,11 +38,13 @@ public:
 	float lerp(float t, float a, float b);
 	void setStagePlane();
 	void generateObjectPosition(Node* object, int amount);
-	void switchSpreading();
+	void switchSpreading(bool choice);
 	glm::vec3 getPosition(glm::vec2 coord);
 
 	GLuint VBO, VBO2, VAO;
 	int row, col;
+	glm::vec3 center;
+	int grassRadius;
 };
 
 #endif

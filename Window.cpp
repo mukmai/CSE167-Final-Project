@@ -1,7 +1,7 @@
 #include "window.h"
 
 const char* window_title = "GLFW Starter Project";
-bool fullScreen = false;
+bool fullScreen = true;
 bool Window::playerView = true;
 bool Window::toon_shade = false;
 LSystem* mainTree;
@@ -18,6 +18,7 @@ Transform* stageS;
 Transform* orbOffset;
 Transform* particlePlacement;
 Transform* mainTreeS;
+Transform* orbS;
 
 Geometry* orb;
 Geometry* stage;
@@ -34,7 +35,14 @@ ParticleManager* particles;
 std::vector<std::pair<Node*, int>> objects;
 
 bool spreadMode = false;
-float growRatio = 0;
+float treeGrowRatio = 0;
+bool Window::endGame = false;
+bool Window::endFinished = false;
+float orbShrinkRatio = 1;
+int spinRound = 1080;
+int nStepsBack = 10;
+int nCamBackOff = 280;
+int standTime = 400;
 
 Player* player;
 PlayerBody* playerBody;
@@ -101,6 +109,7 @@ void Window::initialize_objects()
 	stageOffset = new Transform(glm::translate(glm::mat4(1.0f), glm::vec3(0,-0.7,0)));
 	stageS = new Transform(glm::scale(glm::mat4(1.0f), glm::vec3(5,1,5)));
 	orbOffset = new Transform(glm::translate(glm::mat4(1.0f), glm::vec3(0, 5, 0)));
+	orbS = new Transform(glm::scale(glm::mat4(1.0f), glm::vec3(orbShrinkRatio)));
 	
 	// where the particle system begins generating particles
 	particlePlacement = new Transform(glm::mat4(1.0f));
@@ -130,10 +139,11 @@ void Window::initialize_objects()
 	world->addChild(stageOffset);
 	stageOffset->addChild(stageS);
 	stageOffset->addChild(orbOffset);
-	orbOffset->addChild(orb);
+	orbOffset->addChild(orbS);
+	orbS->addChild(orb);
 
 	mainTree = new LSystem(2, 7);
-	mainTreeS = new Transform(glm::scale(glm::mat4(1.0f), glm::vec3(growRatio)));
+	mainTreeS = new Transform(glm::scale(glm::mat4(1.0f), glm::vec3(treeGrowRatio)));
 	Transform* treeR1 = new Transform(glm::rotate(glm::mat4(1.0f), -glm::radians(60.0f), glm::vec3(0.0f, 1.0f, 0.0f)));
 	Transform* treeR2 = new Transform(glm::rotate(glm::mat4(1.0f), -glm::radians(120.0f), glm::vec3(0.0f, 1.0f, 0.0f)));
 	treeR1->addChild(mainTree);
@@ -244,13 +254,66 @@ void Window::idle_callback()
 {
 	particles->update();
 	playerBody->update();
-	if (spreadMode && growRatio < 1) {
-		growRatio += 0.01;
-		mainTreeS->set(glm::scale(glm::mat4(1.0f), glm::vec3(growRatio)));
+	if (spreadMode && treeGrowRatio < 1) {
+		treeGrowRatio += 0.01;
+		mainTreeS->set(glm::scale(glm::mat4(1.0f), glm::vec3(treeGrowRatio)));
 	}
-	else if (!spreadMode && growRatio > 0) {
-		growRatio -= 0.01;
-		mainTreeS->set(glm::scale(glm::mat4(1.0f), glm::vec3(growRatio)));
+	else if (!endGame && !spreadMode && treeGrowRatio > 0) {
+		treeGrowRatio -= 0.01;
+		mainTreeS->set(glm::scale(glm::mat4(1.0f), glm::vec3(treeGrowRatio)));
+	}
+	if (endGame && !endFinished) {
+		if (orbShrinkRatio > 0) {
+			playerBody->moving = false;
+			player->cam_look_at = glm::vec3(0,4,0);
+			orbShrinkRatio -= 0.01;
+			orbS->set(glm::scale(glm::mat4(1.0f), glm::vec3(orbShrinkRatio)));
+		} else {
+			if (nStepsBack > 0 && (standTime % 2 == 0)) {
+				standTime--;
+				nStepsBack--;
+				player->move(2);
+			}
+			else if (nStepsBack > 0 && (standTime % 2 == 1)){
+				standTime--;
+			}
+			else {
+				if (standTime > 0) {
+					// drop particle here
+					playerBody->moving = false;
+					standTime--;
+				}
+				else {
+					particles->turnParticlesOff();
+					terrain->switchSpreading(true);
+					if (treeGrowRatio < 1) {
+						treeGrowRatio += 0.004;
+						mainTreeS->set(glm::scale(glm::mat4(1.0f), glm::vec3(treeGrowRatio)));
+					}
+					if (nCamBackOff > 0) {
+						nCamBackOff--;
+						player->cam_backOff += glm::vec3(-0.35, 0.25, 0);
+					}
+					if (spinRound > 360) {
+						spinRound--;
+						player->cam_rotateX = glm::rotate(player->cam_rotateX, -glm::radians(0.5f), glm::vec3(0, 1, 0));
+					}
+					else {
+						player->cam_look_at = player->position + glm::vec3(0, 3, 0);
+						if (nCamBackOff > -140) {
+							nCamBackOff--;
+							player->cam_backOff += glm::vec3(0.7, -0.5, 0);
+							player->cam_rotateX = glm::rotate(player->cam_rotateX, -glm::radians(0.5f), glm::vec3(0, 1, 0));
+						}
+						else {
+							endFinished = true;
+						}
+					}
+				}
+			}
+
+		}
+		player->update();
 	}
 }
 
@@ -357,9 +420,9 @@ void Window::key_callback(GLFWwindow* window, int key, int scancode, int action,
 		regularV = VM * VOrig;
 	}
 	else if (key == GLFW_KEY_2) {
-		terrain->switchSpreading();
 		spreadMode = !spreadMode;
-
+		terrain->switchSpreading(spreadMode);
+		
 		if (spreadMode) {
 			particles->turnParticlesOff();
 		}
@@ -370,37 +433,39 @@ void Window::key_callback(GLFWwindow* window, int key, int scancode, int action,
 	else if (key == GLFW_KEY_4) {
 		toon_shade = !toon_shade;
 	}
-	else if (key == GLFW_KEY_W) {
-		if (action == GLFW_RELEASE) {
-			playerBody->moving = false;
+	else if (!endGame || endFinished) {
+		if (key == GLFW_KEY_W) {
+			if (action == GLFW_RELEASE) {
+				playerBody->moving = false;
+			}
+			else {
+				player->move(0);
+			}
 		}
-		else {
-			player->move(0);
-		}
-	}
-	else if (key == GLFW_KEY_D) {
-		if (action == GLFW_RELEASE) {
-			playerBody->moving = false;
-		}
-		else {
+		else if (key == GLFW_KEY_D) {
+			if (action == GLFW_RELEASE) {
+				playerBody->moving = false;
+			}
+			else {
+				player->move(1);
+			}
 			player->move(1);
 		}
-		player->move(1);
-	}
-	else if (key == GLFW_KEY_S) {
-		if (action == GLFW_RELEASE) {
-			playerBody->moving = false;
+		else if (key == GLFW_KEY_S) {
+			if (action == GLFW_RELEASE) {
+				playerBody->moving = false;
+			}
+			else {
+				player->move(2);
+			}
 		}
-		else {
-			player->move(2);
-		}
-	}
-	else if (key == GLFW_KEY_A) {
-		if (action == GLFW_RELEASE) {
-			playerBody->moving = false;
-		}
-		else {
-			player->move(3);
+		else if (key == GLFW_KEY_A) {
+			if (action == GLFW_RELEASE) {
+				playerBody->moving = false;
+			}
+			else {
+				player->move(3);
+			}
 		}
 	}
 
@@ -438,7 +503,7 @@ void Window::cursor_pos_callback(GLFWwindow* window, double xpos, double ypos) {
 
 		lastTrackBallPoint = curTrackBallPoint;
 	}
-	else if (playerView) {
+	else if (playerView && (!endGame || endFinished)) {
 		curMousePos.x = xpos;
 		curMousePos.y = ypos;
 		float xdiff = curMousePos.x - lastMousePos.x;
@@ -465,6 +530,7 @@ glm::vec3 Window::trackBallMapping(GLFWwindow* window, double x, double y)
 }
 
 void Window::initializeTerrain() {
+	objects.clear();
 	// totems and their constituent parts
 	Totem* totemA = new Totem(totemParts, 0);
 	Totem* totemB = new Totem(totemParts, 1);
