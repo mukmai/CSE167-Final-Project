@@ -42,7 +42,7 @@ float orbShrinkRatio = 1;
 int spinRound = 1080;
 int nStepsBack = 10;
 int nCamBackOff = 280;
-int standTime = 400;
+int standTime = 300;
 
 Player* player;
 PlayerBody* playerBody;
@@ -265,7 +265,7 @@ void Window::idle_callback()
 	if (endGame && !endFinished) {
 		if (orbShrinkRatio > 0) {
 			playerBody->moving = false;
-			player->cam_look_at = glm::vec3(0,4,0);
+			player->cam_look_at = glm::vec3(0, 4, 0) + (player->position + glm::vec3(0, 3, 0) - glm::vec3(0, 4, 0)) * orbShrinkRatio;
 			orbShrinkRatio -= 0.01;
 			orbS->set(glm::scale(glm::mat4(1.0f), glm::vec3(orbShrinkRatio)));
 		} else {
