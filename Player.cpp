@@ -1,7 +1,5 @@
 #include "Player.h"
 
-
-
 Player::Player(PlayerBody* playerBody, Terrain* terrain)
 {
 	this->terrain = terrain;
@@ -36,7 +34,7 @@ void Player::update() {
 	posOffset->set(glm::translate(glm::mat4(1.0f), position));
 	
 	cam_pos =  position + glm::vec3(cam_rotateX * cam_rotateY * glm::vec4(cam_backOff,1));
-	cam_look_at = position;
+	cam_look_at = position + glm::vec3(0,3,0);
 	thirdPersonV = glm::lookAt(cam_pos, cam_look_at, cam_up);
 }
 

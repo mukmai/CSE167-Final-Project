@@ -1,8 +1,10 @@
 #include "window.h"
 
 const char* window_title = "GLFW Starter Project";
-bool fullScreen = false;
+bool fullScreen = true;
 bool playerView = true;
+
+LSystem* mainTree;
 
 OBJObject* sphere;
 OBJObject* cylinder;
@@ -266,7 +268,7 @@ void Window::initialize_objects()
 
 	initializeTerrain();
 
-	sunLight = new LightSource(glm::vec3(0.5, 0.47, 0.35), glm::vec3(0, -1, -1));
+	sunLight = new LightSource(glm::vec3(0.5, 0.47, 0.35), glm::vec3(0, -1, 2));
 
 	Geometry* bodyPart = new Geometry(cylinder, glm::vec3(0.95, 0.63, 0.84));
 	Geometry* headPart = new Geometry(sphere, glm::vec3(0.2, 0.2, 0.2));
@@ -284,6 +286,15 @@ void Window::initialize_objects()
 	stageOffset->addChild(stageS);
 	stageOffset->addChild(orbOffset);
 	orbOffset->addChild(orb);
+
+	mainTree = new LSystem(2, 7);
+	Transform* treeR1 = new Transform(glm::rotate(glm::mat4(1.0f), -glm::radians(60.0f), glm::vec3(0.0f, 1.0f, 0.0f)));
+	Transform* treeR2 = new Transform(glm::rotate(glm::mat4(1.0f), -glm::radians(120.0f), glm::vec3(0.0f, 1.0f, 0.0f)));
+	treeR1->addChild(mainTree);
+	treeR2->addChild(mainTree);
+	stageOffset->addChild(mainTree);
+	stageOffset->addChild(treeR1);
+	stageOffset->addChild(treeR2);
 
 	stageS->addChild(stage);
 
@@ -474,11 +485,15 @@ void Window::key_callback(GLFWwindow* window, int key, int scancode, int action,
 			seed--;
 			delete(terrain);
 			initializeTerrain();
+			player->terrain = terrain;
+			player->update();
 		}
 		else {
 			seed++;
 			delete(terrain);
 			initializeTerrain();
+			player->terrain = terrain;
+			player->update();
 		}
 		regularV = VM * VOrig;
 	}
@@ -560,10 +575,6 @@ glm::vec3 Window::trackBallMapping(GLFWwindow* window, double x, double y)
 }
 
 void Window::initializeTerrain() {
-	Geometry* object1 = new Geometry(cylinder, glm::vec3(0.7, 0, 0));
-	Geometry* object2 = new Geometry(cylinder, glm::vec3(0, 0.7, 0));
-	Geometry* object3 = new Geometry(cylinder, glm::vec3(0, 0, 0.7));
-
 	// totems and their constituent parts
 	Totem* totemA = new Totem(totemParts, 0);
 	Totem* totemB = new Totem(totemParts, 1);
@@ -571,13 +582,18 @@ void Window::initializeTerrain() {
 	Totem* totemD = new Totem(totemParts, 3);
 	Totem* totemE = new Totem(totemParts, 4);
 
-	objects.push_back(std::make_pair(object1, 20));
-	objects.push_back(std::make_pair(object2, 20));
 	objects.push_back(std::make_pair(totemA, 2));
 	objects.push_back(std::make_pair(totemB, 2));
 	objects.push_back(std::make_pair(totemC, 2));
 	objects.push_back(std::make_pair(totemD, 2));
 	objects.push_back(std::make_pair(totemE, 2));
+
+	LSystem* object1 = new LSystem(0, 4);
+	LSystem* object2 = new LSystem(1, 3);
+	LSystem* object3 = new LSystem(0, 5);
+	objects.push_back(std::make_pair(object1, 7));
+	objects.push_back(std::make_pair(object2, 10));
+	objects.push_back(std::make_pair(object3, 5));
 
 	terrain = new Terrain(terrainSize, terrainSize, 1, objects);
 }

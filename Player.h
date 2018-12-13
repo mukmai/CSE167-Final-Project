@@ -13,7 +13,6 @@ class Player :
 	public Node
 {
 private:
-	Terrain* terrain;
 	Transform* posOffset;
 	Transform* rotation;
 	PlayerBody* playerBody;
@@ -32,6 +31,7 @@ public:
 	glm::vec3 cam_backOff;
 	glm::mat4 cam_rotateX, cam_rotateY;
 	glm::mat4 thirdPersonV;
+	Terrain* terrain;
 };
 
 #endif
