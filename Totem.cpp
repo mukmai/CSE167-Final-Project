@@ -2,28 +2,11 @@
 
 #include <time.h>
 
-Totem::Totem(std::vector<TotemPart*> totemParts) {
+Totem::Totem(std::vector<TotemPart*> totemParts, int counterVal) {
 	srand(time(NULL));
 
 	// categorize all parts before using them
 	createCategories(totemParts);
-
-	// padding out the time...
-	rand();
-	rand();
-	rand();
-	rand();
-	rand();
-	rand();
-	rand();
-	rand();
-	rand();
-	rand();
-	rand();
-	rand();
-	rand();
-	rand();
-	rand();
 
 	float initRotation = rand() % 360;
 	float initRotation2 = 5 - rand() % 10;
@@ -38,17 +21,17 @@ Totem::Totem(std::vector<TotemPart*> totemParts) {
 	this->rotateVal = 25.0f;
 
 	// build a random totem
-	generateTotem();
+	generateTotem(counterVal);
 
-	this->transform->translate(glm::vec3(0, -1.0 * this->runningCount / 5, 0.0));
+	this->transform->translate(glm::vec3(0, -.1, 0.0));
 }
 
-Totem::~Totem() {
-	// TODO
+Totem::~Totem() 
+{
 }
 
-void Totem::generateTotem() {
-	srand(time(NULL));
+void Totem::generateTotem(int counterVal) {
+	srand(time(NULL) + counterVal);
 
 	// for containing reference to the bottommost piece, set it as the first (and only) child of the Totem
 	TotemPart* basePiece = new TotemPart(BODY_NOWING_NOMOUTH_NOBOTTOM, this->bodies[0]);
@@ -59,7 +42,7 @@ void Totem::generateTotem() {
 
 	// prevent building infinite structures
 	int counter = 0;
-	int maxCounter = 20;
+	int maxCounter = 40;
 
 	while (queue.size() > 0 && counter <= maxCounter) {
 		std::cout << "counter: " << counter << std::endl;
@@ -86,7 +69,7 @@ void Totem::generateTotem() {
 		assignedMouth = currentPiece->setMouth(randomMouth);
 	
 		float val = 1.25;
-		this->rotateVal -= 2.5;
+		this->rotateVal -= 5.5;
 
 		// if there were any pieces that were successfully assigned, assign the reverse pointer 
 		// in the child and push the child element into the queue. Also make sure it's assigned as a child to its
@@ -111,6 +94,7 @@ void Totem::generateTotem() {
 		if (assignedLeft == 0) {
 			currentPiece->getTransform()->addChild(randomLeft);
 			randomLeft->getTransform()->translate(glm::vec3(-1 * val, 0, 0));
+			//randomLeft->getTransform()->rotate(glm::rotate(glm::mat4(1.0f), glm::radians(this->rotateVal), glm::vec3(0.0f, 1.0f, 0.0f)));
 			//randomLeft->setRight(currentPiece);
 			//queue.push_back(randomLeft);
 			std::cout << "assigned a left to the current part" << std::endl;
@@ -118,6 +102,7 @@ void Totem::generateTotem() {
 		if (assignedRight == 0) {
 			currentPiece->getTransform()->addChild(randomRight);
 			randomRight->getTransform()->translate(glm::vec3(val, 0, 0));
+			//randomRight->getTransform()->rotate(glm::rotate(glm::mat4(1.0f), glm::radians(this->rotateVal), glm::vec3(0.0f, 1.0f, 0.0f)));
 			//randomRight->setLeft(currentPiece);
 			//queue.push_back(randomRight);
 			std::cout << "assigned a right to the current part" << std::endl;
@@ -165,57 +150,6 @@ void Totem::createCategories(std::vector<TotemPart*> totemParts) {
 			this->bottom.push_back(curr);
 
 			// rigging the game
-			this->top.push_back(curr);
-			this->top.push_back(curr);
-			this->top.push_back(curr);
-			this->top.push_back(curr);
-			this->top.push_back(curr);
-			this->top.push_back(curr);
-			this->top.push_back(curr);
-			this->top.push_back(curr);
-			this->top.push_back(curr);
-			this->top.push_back(curr);
-			this->top.push_back(curr);
-			this->top.push_back(curr);
-			this->top.push_back(curr);
-			this->top.push_back(curr);
-			this->top.push_back(curr);
-			this->top.push_back(curr);
-			this->top.push_back(curr);
-			this->top.push_back(curr);
-			this->top.push_back(curr);
-			this->top.push_back(curr);
-			this->top.push_back(curr);
-			this->top.push_back(curr);
-			this->top.push_back(curr);
-			this->top.push_back(curr);
-			this->top.push_back(curr);
-			this->top.push_back(curr);
-			this->top.push_back(curr);
-			this->top.push_back(curr);
-			this->top.push_back(curr);
-			this->top.push_back(curr);
-			this->top.push_back(curr);
-			this->top.push_back(curr);
-			this->top.push_back(curr);
-			this->top.push_back(curr);
-			this->top.push_back(curr);
-			this->top.push_back(curr);
-			this->top.push_back(curr);
-			this->top.push_back(curr);
-			this->top.push_back(curr);
-			this->top.push_back(curr);
-			this->top.push_back(curr);
-			this->top.push_back(curr);
-			this->top.push_back(curr);
-			this->top.push_back(curr);
-			this->top.push_back(curr);
-			this->top.push_back(curr);
-			this->top.push_back(curr);
-			this->top.push_back(curr);
-			this->top.push_back(curr);
-			this->top.push_back(curr);
-			this->top.push_back(curr);
 			this->top.push_back(curr);
 			this->top.push_back(curr);
 			this->top.push_back(curr);

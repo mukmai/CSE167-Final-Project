@@ -40,7 +40,6 @@ TotemPart::TotemPart(TotemPart* toCopy) {
 
 TotemPart::~TotemPart()
 {
-	// TODO
 }
 
 int TotemPart::getId() {

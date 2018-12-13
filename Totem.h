@@ -28,7 +28,7 @@ class Totem :
 	public Node
 {
 public:
-	Totem(std::vector<TotemPart*> totemParts);
+	Totem(std::vector<TotemPart*> totemParts, int counterVal);
 	~Totem();
 	void draw(GLuint shaderProgram, glm::mat4 C);
 	void update();
@@ -46,13 +46,14 @@ private:
 	const int LEFT_WING = 6;
 	const int RIGHT_WING = 7;
 	
+
 	// contains base transform for the bottom of the totem
 	Transform* transform;
 
 	float rotateVal;
 	int runningCount;
 
-	void generateTotem();
+	void generateTotem(int counterVal);
 	void createCategories(std::vector<TotemPart*> totemParts);
 
 	TotemPart* Totem::getRandomTop();

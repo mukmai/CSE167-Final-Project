@@ -110,7 +110,7 @@ void Window::initialize_objects()
 	Geometry* whaleMouth = new Geometry(sphere, glm::vec3(242/255.0, 242/255.0, 242/255.0));
 	Geometry* eagleWing = new Geometry(sphere, glm::vec3(38/255.0, 38/255.0, 38/255.0));
 	Geometry* albatrossWing = new Geometry(sphere, glm::vec3(38/255.0, 38/255.0, 38/255.0));
-	Geometry* catEars = new Geometry(sphere, glm::vec3(38/255.0, 38/255.0, 38/255.0));
+	Geometry* catEars = new Geometry(sphere, glm::vec3(242/255.0, 242/255.0, 242/255.0));
 	Geometry* hatEars = new Geometry(sphere, glm::vec3(242/255.0, 242/255.0, 242/255.0));
 
 	Geometry* blackSphere = new Geometry(sphere, glm::vec3(38 / 255.0, 38 / 255.0, 38 / 255.0));
@@ -127,12 +127,12 @@ void Window::initialize_objects()
 	lizardMouthBottom->addChild(lizardMouth);
 	lizardMouthBottom->scale(glm::vec3(.8, .2, 1.3));
 	lizardMouthBottom->translate(glm::vec3(0, -0.5, .3));
-	lizardMouthBottom->rotate(20);
+	lizardMouthBottom->rotate(30);
 	Transform* lizardTongue = new Transform(glm::mat4(1.0f));
 	lizardTongue->addChild(redSphere);
 	lizardTongue->scale(glm::vec3(.3, .1, 1.75));
+	lizardTongue->rotate(30);
 	lizardTongue->translate(glm::vec3(0, -0.2, .5));
-	lizardTongue->rotate(20);
 	// generic eye
 	Transform* eye = new Transform(glm::mat4(1.0f));
 	Transform* eyeOutline = new Transform(glm::mat4(1.0f));
@@ -148,19 +148,60 @@ void Window::initialize_objects()
 	eyeIris->scale(glm::vec3(.5, .5, .3));
 	eyeIris->translate(glm::vec3(0, 0, 2.5));
 	eyePupil->addChild(blackSphere);
-	eyePupil->scale(glm::vec3(.3, .3, .1));
-	eyePupil->translate(glm::vec3(0, 0, 5));
+	eyePupil->scale(glm::vec3(.3, .3, .4));
+	eyePupil->translate(glm::vec3(0, 0, 2.2));
 	eye->addChild(eyeOutline);
 	eye->addChild(eyeWhites);
 	eye->addChild(eyeIris);
 	eye->addChild(eyePupil);
+	// pair of arms
+	Transform* arms = new Transform(glm::mat4(1.0f));
+	Transform* leftArm = new Transform(glm::mat4(1.0f));
+	arms->addChild(leftArm);
+	Transform* rightArm = new Transform(glm::mat4(1.0f));
+	arms->addChild(rightArm);
+	Transform* leftBicep = new Transform(glm::mat4(1.0f));
+	leftBicep->addChild(whiteSphere);
+	leftBicep->scale(glm::vec3(.5, 1, .5));
+	leftBicep->translate(glm::vec3(-2.1, 0, -.8));
+	leftBicep->rotate(glm::rotate(glm::mat4(1.0f), glm::radians(-20.0f), glm::vec3(0.0f, 0.0f, 1.0f)));
+	leftArm->addChild(leftBicep);
+	Transform* rightBicep = new Transform(glm::mat4(1.0f));
+	rightBicep->addChild(whiteSphere);
+	rightBicep->scale(glm::vec3(.5, 1, .5));
+	rightBicep->translate(glm::vec3(2.1, 0, -.8));
+	rightBicep->rotate(glm::rotate(glm::mat4(1.0f), glm::radians(20.0f), glm::vec3(0.0f, 0.0f, 1.0f)));
+	rightArm->addChild(rightBicep);
+	Transform* leftForearm = new Transform(glm::mat4(1.0f));
+	leftForearm->addChild(redSphere);
+	leftForearm->scale(glm::vec3(.3, 1.5, .3));
+	leftForearm->rotate(glm::rotate(glm::mat4(1.0f), glm::radians(5.0f), glm::vec3(1.0f, 0.0f, 0.0f)));
+	leftForearm->rotate(glm::rotate(glm::mat4(1.0f), glm::radians(60.0f), glm::vec3(0.0f, 1.0f, 0.0f)));
+	leftForearm->translate(glm::vec3(-2.1, -.7, -0.75));
+	leftBicep->addChild(leftForearm);
+	Transform* rightForearm = new Transform(glm::mat4(1.0f));
+	rightForearm->addChild(redSphere);
+	rightForearm->scale(glm::vec3(.3, 1.5, .3));
+	rightForearm->rotate(glm::rotate(glm::mat4(1.0f), glm::radians(5.0f), glm::vec3(1.0f, 0.0f, 0.0f)));
+	rightForearm->rotate(glm::rotate(glm::mat4(1.0f), glm::radians(-60.0f), glm::vec3(0.0f, 1.0f, 0.0f)));
+	rightForearm->translate(glm::vec3(2.1, -.7, -0.75));
+	rightBicep->addChild(rightForearm);
+	Transform* rightOtherPair = new Transform(glm::mat4(1.0f));
+	Transform* leftOtherPair = new Transform(glm::mat4(1.0f));
+	arms->addChild(rightOtherPair);
+	arms->addChild(leftOtherPair);
+	rightOtherPair->addChild(rightBicep);
+	leftOtherPair->addChild(leftBicep);
+	rightOtherPair->translate(glm::vec3(0, 0, .5));
+	leftOtherPair->translate(glm::vec3(0, 0, .5));
+	rightOtherPair->scale(glm::vec3(.5, .5, .5));
+	leftOtherPair->scale(glm::vec3(.5, .5, .5));
 
 	// transforms
 	Transform* totemBodyT = new Transform(glm::mat4(1.0f));
 	totemBodyT->scale(glm::vec3(1, 1, 1));
 	totemBodyT->addChild(totemBody);
 	Transform* eagleMouthT = new Transform(glm::mat4(1.0f));
-	//eagleMouthT->scale(glm::vec3(10, 10, 10));
 	Transform* mainEye = new Transform(glm::mat4(1.0));
 	mainEye->addChild(eye);
 	eagleMouthT->addChild(mainEye);
@@ -178,16 +219,15 @@ void Window::initialize_objects()
 	rightEye->rotate(glm::rotate(glm::mat4(1.0f), glm::radians(20.0f), glm::vec3(0.0f, 1.0f, 0.0f)));
 	eagleMouthT->addChild(leftEye);
 	eagleMouthT->addChild(rightEye);
+
 	Transform* lizardMouthT = new Transform(glm::mat4(1.0f));
-	//lizardMouthT->scale(glm::vec3(10, 10, 10));
 	eagleMouthT->addChild(eagleMouth);
 	lizardMouthT->addChild(lizardMouthTop);
 	lizardMouthT->addChild(lizardMouthBottom);
 	lizardMouthT->addChild(lizardTongue);
+
 	Transform* whaleMouthT = new Transform(glm::mat4(1.0f));
-	//whaleMouthT->scale(glm::vec3(10, 10, 10));
-	eagleMouthT->addChild(eagleMouth);
-	whaleMouthT->addChild(whaleMouth);
+	whaleMouthT->addChild(arms);
 	Transform* eagleWingLT = new Transform(glm::mat4(1.0f));
 	eagleWingLT->addChild(eagleWing);
 	eagleWingLT->scale(glm::vec3(5, .75, .01));
@@ -222,19 +262,6 @@ void Window::initialize_objects()
 	totemParts.push_back(new TotemPart(EARS, catEarsT));
 	totemParts.push_back(new TotemPart(EARS, hatEarsT));
 
-	// construct a single totem
-	Totem* totem = new Totem(totemParts);
-	Totem* totemA = new Totem(totemParts);
-	Totem* totemB = new Totem(totemParts);
-	totem->getTransform()->scale(glm::vec3(5, 5, 5)); // make it really big
-	totem->getTransform()->translate(glm::vec3(-15, 0, -5));
-
-	totemA->getTransform()->scale(glm::vec3(2, 2, 2));
-	totemA->getTransform()->translate(glm::vec3(-10, 0, -10));
-
-	totemB->getTransform()->scale(glm::vec3(2, 2, 2));
-	totemB->getTransform()->translate(glm::vec3(10, 0, 10));
-
 	// DEBUG STUFF
 	/*
 	Geometry* skullG = new Geometry(skull, glm::vec3(0, 0.80, 0.91));
@@ -258,7 +285,7 @@ void Window::initialize_objects()
 
 	// actual particle generation system
 	Geometry* particleShape = new Geometry(sphere, glm::vec3(0.95f, 0.75f, 0.38f));
-	particles = new ParticleManager(2000, particleShape);
+	particles = new ParticleManager(10000, particleShape);
 	//particles->transform->translate(glm::vec3(0, 10, 0));
 
 	world->addChild(cubemapS);
@@ -271,9 +298,6 @@ void Window::initialize_objects()
 	stageS->addChild(stage);
 
 	world->addChild(particles);
-	world->addChild(totem);
-	world->addChild(totemA);
-	world->addChild(totemB);
 
 	// Load the shader program. Make sure you have the correct filepath up top
 	shaderProgram = LoadShaders(VERTEX_SHADER_PATH, FRAGMENT_SHADER_PATH);
@@ -551,11 +575,19 @@ void Window::initializeTerrain() {
 	Geometry* object3 = new Geometry(cylinder, glm::vec3(0, 0, 0.7));
 
 	// totems and their constituent parts
-	Totem* totem = new Totem(totemParts);
+	Totem* totemA = new Totem(totemParts, 0);
+	Totem* totemB = new Totem(totemParts, 1);
+	Totem* totemC = new Totem(totemParts, 2);
+	Totem* totemD = new Totem(totemParts, 3);
+	Totem* totemE = new Totem(totemParts, 4);
 
 	objects.push_back(std::make_pair(object1, 20));
 	objects.push_back(std::make_pair(object2, 20));
-	objects.push_back(std::make_pair(totem, 10));
+	objects.push_back(std::make_pair(totemA, 2));
+	objects.push_back(std::make_pair(totemB, 2));
+	objects.push_back(std::make_pair(totemC, 2));
+	objects.push_back(std::make_pair(totemD, 2));
+	objects.push_back(std::make_pair(totemE, 2));
 
 	terrain = new Terrain(terrainSize, terrainSize, 1, objects);
 }

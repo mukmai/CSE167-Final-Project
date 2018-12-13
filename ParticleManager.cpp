@@ -12,8 +12,8 @@ ParticleManager::ParticleManager(int amount, Geometry* particleShape) {
 	}
 }
 
-ParticleManager::~ParticleManager() {
-	// TODO
+ParticleManager::~ParticleManager() 
+{
 }
 
 void ParticleManager::draw(GLuint shaderProgram, glm::mat4 C) {
@@ -24,7 +24,7 @@ void ParticleManager::draw(GLuint shaderProgram, glm::mat4 C) {
 }
 
 void ParticleManager::update() {
-	for (GLuint i = 0; i < 2; ++i) {
+	for (GLuint i = 0; i < 10; ++i) {
 		int unusedParticle = this->firstUnusedParticle();
 		this->particles[unusedParticle]->respawn();
 	}
