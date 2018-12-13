@@ -3,13 +3,13 @@
 #include <time.h>
 
 Totem::Totem(std::vector<TotemPart*> totemParts, int counterVal) {
-	srand(time(NULL));
+	srand(time(NULL) + counterVal);
 
 	// categorize all parts before using them
 	createCategories(totemParts);
 
 	float initRotation = rand() % 360;
-	float initRotation2 = 5 - rand() % 10;
+	float initRotation2 = 15 - rand() % 30;
 	std::cout << "initRotation: " << initRotation << std::endl;
 
 	// set the totem's main transformation matrix
@@ -28,6 +28,9 @@ Totem::Totem(std::vector<TotemPart*> totemParts, int counterVal) {
 
 Totem::~Totem() 
 {
+	for (int i = 0; i < this->parts.size(); i++) {
+		delete(parts[i]);
+	}
 }
 
 void Totem::generateTotem(int counterVal) {
@@ -79,7 +82,7 @@ void Totem::generateTotem(int counterVal) {
 			currentPiece->getTransform()->addChild(randomTop);
 				
 			randomTop->getTransform()->translate(glm::vec3(0, val, 0));
-			randomTop->getTransform()->rotate(glm::rotate(glm::mat4(1.0f), glm::radians(this->rotateVal), glm::vec3(0.0f, 1.0f, 0.0f)));
+			//randomTop->getTransform()->rotate(glm::rotate(glm::mat4(1.0f), glm::radians(this->rotateVal), glm::vec3(0.0f, 1.0f, 0.0f)));
 			randomTop->setBottom(currentPiece);
 			queue.push_back(randomTop);
 			std::cout << "assigned a top to the current part" << std::endl;
@@ -116,6 +119,8 @@ void Totem::generateTotem(int counterVal) {
 			std::cout << "assigned a mouth to the current part" << std::endl;
 		}
 
+		// save the current piece so it doesn't get lost during destruction
+		this->parts.push_back(queue[0]);
 		// remove the current piece from the queue
 		queue.erase(queue.begin());
 
@@ -150,12 +155,6 @@ void Totem::createCategories(std::vector<TotemPart*> totemParts) {
 			this->bottom.push_back(curr);
 
 			// rigging the game
-			this->top.push_back(curr);
-			this->top.push_back(curr);
-			this->top.push_back(curr);
-			this->top.push_back(curr);
-			this->top.push_back(curr);
-			this->top.push_back(curr);
 			this->top.push_back(curr);
 			this->top.push_back(curr);
 			this->top.push_back(curr);
